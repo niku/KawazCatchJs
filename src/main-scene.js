@@ -1,5 +1,7 @@
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html
 var MainSceneLayer = cc.Layer.extend({
+    player_: null,
+
     // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html#ctor
     ctor: function() {
         this._super();
@@ -22,6 +24,10 @@ var MainSceneLayer = cc.Layer.extend({
         background.setPosition(new cc.Point(size.width / 2.0, size.height / 2.0));
         // 親ノードにスプライトを追加する
         this.addChild(background);
+
+        this.player_ = new cc.Sprite(res.player); // Sprite を生成して player_ に格納
+        this.player_.setPosition(new cc.Point(size.width / 2.0, size.height - 445)); // player_ の位置を設定
+        this.addChild(this.player_); // シーンに player_ を配置
     }
 });
 
