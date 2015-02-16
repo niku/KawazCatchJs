@@ -34,13 +34,23 @@ var MainSceneLayer = cc.Layer.extend({
             onTouchBegan: function(touch, event) {
                 // タッチされたときの処理
                 return true;
-            },
+            }.bind(this),
             onTouchMoved: function(touch, event) {
                 // タッチ中に動いたときの処理
                 // touch には Touch オブジェクトが渡されてくる
                 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Touch.html
-                cc.log("Touch at (%f, %f)", touch.getLocationX(), touch.getLocationY());
-            }
+
+                // 前回とのタッチ位置との差をベクトルで取得する
+                var delta = touch.getDelta();
+
+                // 現在のかわずたんの座標を取得する
+                var position = this.player_.getPosition();
+
+                // 現在座標 + 移動量を新たな座標にする
+                var newPosition = cc.pAdd(position, delta);
+
+                this.player_.setPosition(newPosition);
+            }.bind(this)
         }, this);
     }
 });
