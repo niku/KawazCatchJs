@@ -20,13 +20,18 @@ var MainSceneLayer = cc.Layer.extend({
         var background = new cc.Sprite(res.background);
         // スプライトの表示位置を設定する
         // cocos2d-x の Vec2 は別名 Point という (cocos2d-x 本の「3.4.4 ノードの位置の移動」参照)
-        // cocos2d-js では Vec2 はみつからず，Point という名前に統一しているようだ．
-        background.setPosition(new cc.Point(size.width / 2.0, size.height / 2.0));
+        // cocos2d-js では Vec2 はみつからず，cc.p という名前に統一しているようだ．
+        //
+        // new cc.Point は
+        // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Point.html#constructor
+        // > please do not use its constructor to create points
+        // なので使わないこと．
+        background.setPosition(cc.p(size.width / 2.0, size.height / 2.0));
         // 親ノードにスプライトを追加する
         this.addChild(background);
 
         this.player_ = new cc.Sprite(res.player); // Sprite を生成して player_ に格納
-        this.player_.setPosition(new cc.Point(size.width / 2.0, size.height - 445)); // player_ の位置を設定
+        this.player_.setPosition(cc.p(size.width / 2.0, size.height - 445)); // player_ の位置を設定
         this.addChild(this.player_); // シーンに player_ を配置
 
         cc.eventManager.addListener({
@@ -34,13 +39,23 @@ var MainSceneLayer = cc.Layer.extend({
             onTouchBegan: function(touch, event) {
                 // タッチされたときの処理
                 return true;
-            },
+            }.bind(this),
             onTouchMoved: function(touch, event) {
                 // タッチ中に動いたときの処理
                 // touch には Touch オブジェクトが渡されてくる
                 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Touch.html
-                cc.log("Touch at (%f, %f)", touch.getLocationX(), touch.getLocationY());
-            }
+
+                // 前回とのタッチ位置との差をベクトルで取得する
+                var delta = touch.getDelta();
+
+                // 現在のかわずたんの座標を取得する
+                var position = this.player_.getPosition();
+
+                // 現在座標 + 移動量を新たな座標にする
+                var newPosition = cc.pAdd(position, delta);
+
+                this.player_.setPosition(newPosition);
+            }.bind(this)
         }, this);
     }
 });
