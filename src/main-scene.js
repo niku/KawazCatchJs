@@ -54,7 +54,9 @@ var MainSceneLayer = cc.Layer.extend({
                 // 現在座標 + 移動量を新たな座標にする
                 var newPosition = cc.pAdd(position, delta);
 
-                this.player_.setPosition(newPosition);
+                var winSize = cc.director.getWinSize();
+
+                this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
             }.bind(this)
         }, this);
     }
