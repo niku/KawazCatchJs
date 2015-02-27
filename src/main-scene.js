@@ -60,6 +60,17 @@ var MainSceneLayer = cc.Layer.extend({
                 this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
             }.bind(this)
         }, this);
+
+        // updateを毎フレーム実行するように登録する
+        this.scheduleUpdate();
+    },
+
+    update: function(dt) {
+        // 毎フレーム実行される
+        var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
+        if(random === 0) {
+            this.addFruit();
+        }
     },
 
     addFruit: function() {
