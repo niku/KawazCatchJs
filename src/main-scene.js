@@ -114,6 +114,8 @@ MainSceneLayer.FruitType = [
 ];
 // フルーツの画面上端からのマージン(px)
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
+// フルーツの出現率
+MainSceneLayer.FRUIT_SPAWN_RATE = 20;
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
