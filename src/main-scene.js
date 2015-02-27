@@ -62,6 +62,13 @@ var MainSceneLayer = cc.Layer.extend({
         }, this);
     }
 });
+MainSceneLayer.FruitType = [
+    "APPLE",
+    "GRAPE",
+    "ORANGE",
+    "BANANA",
+    "CHERRY"
+];
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
