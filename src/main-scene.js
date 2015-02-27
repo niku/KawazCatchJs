@@ -60,6 +60,31 @@ var MainSceneLayer = cc.Layer.extend({
                 this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
             }.bind(this)
         }, this);
+    },
+
+    addFruit: function() {
+        // 画面サイズを取り出す
+        var winSize = cc.director.getWinSize();
+
+
+        // フルーツの種類の数を上限としたランダムな整数を取得する
+        // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+        // の「min から max までの乱整数を返す関数」を参考にした
+        var randomFruitNumber = Math.floor(cc.random0To1() * (MainSceneLayer.FruitType.length));
+        // フルーツを作成する
+        var fruitName = cc.formatStr("fruit%d", randomFruitNumber);
+        var fruit = new cc.Sprite(res[fruitName]);
+        fruit.setTag(randomFruitNumber); // フルーツの種類をタグとして指定する
+
+        var fruitSize = fruit.getContentSize(); // フルーツのサイズを取り出す
+        var fruitXPos = Math.floor(cc.random0To1() * (winSize.width)); // X軸のランダムな位置を選択する
+
+        fruit.setPosition(cc.p(fruitXPos,
+                               winSize.height - MainSceneLayer.FRUIT_TOP_MARGIN - fruitSize.height / 2.0));
+        this.addChild(fruit);
+        this.fruits_.push(fruit);
+
+        return fruit;
     }
 });
 MainSceneLayer.FruitType = [
