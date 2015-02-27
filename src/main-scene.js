@@ -95,6 +95,16 @@ var MainSceneLayer = cc.Layer.extend({
         this.addChild(fruit);
         this.fruits_.push(fruit);
 
+        // 地面の座標
+        var ground = cc.p(fruitXPos, 0);
+        // 3秒かけてgroundの位置まで落下させるアクション
+        var fall = cc.moveTo(3, ground);
+        // removeFruitを即座に呼び出すアクション
+        var remove = cc.callFunc(this.removeFruit, this, fruit);
+        // fallとremoveを連続して実行させるアクション
+        var sequence = cc.sequence(fall, remove);
+        fruit.runAction(sequence);
+
         return fruit;
     },
 
