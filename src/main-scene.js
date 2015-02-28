@@ -71,6 +71,15 @@ var MainSceneLayer = cc.Layer.extend({
         if(random === 0) {
             this.addFruit();
         }
+
+        this.fruits_.forEach(function(element, index, array) {
+            var busketPosition = cc.pAdd(this.player_.getPosition(), cc.p(0, -10));
+            var boundingBox = element.getBoundingBox(); // フルーツの矩形を取り出す
+            var isHit = cc.rectContainsPoint(boundingBox, busketPosition);
+            if (isHit) {
+                this.catchFruit(element);
+            }
+        }, this);
     },
 
     addFruit: function() {
@@ -123,6 +132,10 @@ var MainSceneLayer = cc.Layer.extend({
             }
         });
         return removed;
+    },
+
+    catchFruit: function(fruit) {
+        this.removeFruit(fruit);
     }
 });
 MainSceneLayer.FruitType = [
