@@ -83,8 +83,7 @@ var MainSceneLayer = cc.Layer.extend({
         // の「min から max までの乱整数を返す関数」を参考にした
         var randomFruitNumber = Math.floor(cc.random0To1() * (MainSceneLayer.FruitType.length));
         // フルーツを作成する
-        var fruitName = cc.formatStr("fruit%d", randomFruitNumber);
-        var fruit = new cc.Sprite(res[fruitName]);
+        var fruit = new cc.Sprite(res.fruits[randomFruitNumber]);
         fruit.setTag(randomFruitNumber); // フルーツの種類をタグとして指定する
 
         var fruitSize = fruit.getContentSize(); // フルーツのサイズを取り出す
