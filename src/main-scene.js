@@ -60,6 +60,17 @@ var MainSceneLayer = cc.Layer.extend({
                 this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
             }.bind(this)
         }, this);
+
+        // updateを毎フレーム実行するように登録する
+        this.scheduleUpdate();
+    },
+
+    update: function(dt) {
+        // 毎フレーム実行される
+        var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
+        if(random === 0) {
+            this.addFruit();
+        }
     },
 
     addFruit: function() {
@@ -114,6 +125,8 @@ MainSceneLayer.FruitType = [
 ];
 // フルーツの画面上端からのマージン(px)
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
+// フルーツの出現率
+MainSceneLayer.FRUIT_SPAWN_RATE = 20;
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
