@@ -85,6 +85,24 @@ var MainSceneLayer = cc.Layer.extend({
         this.fruits_.push(fruit);
 
         return fruit;
+    },
+
+    removeFruit: function(fruit) {
+        var removed = false;
+        // fruits_にfruitが含まれているかを確認する
+        // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
+        this.fruits_.forEach(function(element, index, array) {
+            if(element === fruit) {
+                // 親ノードから削除する
+                fruit.removeFromParent();
+                // 配列から削除する
+                // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
+                array.splice(index, 1);
+                removed = true;
+                return;
+            }
+        });
+        return removed;
     }
 });
 MainSceneLayer.FruitType = [
