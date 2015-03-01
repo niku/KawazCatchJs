@@ -2,6 +2,8 @@
 var MainSceneLayer = cc.Layer.extend({
     player_: null,
     fruits_: [],
+    score_: 0,
+    scoreLabel_: null,
 
     // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html#ctor
     ctor: function() {
@@ -60,6 +62,10 @@ var MainSceneLayer = cc.Layer.extend({
                 this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
             }.bind(this)
         }, this);
+
+        this.scoreLabel_ = new cc.LabelTTF(cc.formatStr("%d", this.score_), "Times New Roman", 16);
+        this.scoreLabel_.setPosition(cc.p(size.width / 2.0 * 1.5, size.height - 40));
+        this.addChild(this.scoreLabel_);
 
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
@@ -136,6 +142,8 @@ var MainSceneLayer = cc.Layer.extend({
 
     catchFruit: function(fruit) {
         this.removeFruit(fruit);
+        this.score_ += 1;
+        this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
     }
 });
 MainSceneLayer.FruitType = [
