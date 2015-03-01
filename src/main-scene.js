@@ -2,6 +2,8 @@
 var MainSceneLayer = cc.Layer.extend({
     player_: null,
     fruits_: [],
+    score_: 0,
+    scoreLabel_: null,
 
     // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html#ctor
     ctor: function() {
