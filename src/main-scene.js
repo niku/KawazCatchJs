@@ -142,6 +142,8 @@ var MainSceneLayer = cc.Layer.extend({
 
     catchFruit: function(fruit) {
         this.removeFruit(fruit);
+        this.score_ += 1;
+        this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
     }
 });
 MainSceneLayer.FruitType = [
