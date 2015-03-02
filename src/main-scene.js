@@ -63,12 +63,21 @@ var MainSceneLayer = cc.Layer.extend({
             }.bind(this)
         }, this);
 
+        // スコアラベルの追加
         this.scoreLabel_ = new cc.LabelTTF(cc.formatStr("%d", this.score_), "Times New Roman", 16);
         this.scoreLabel_.setPosition(cc.p(size.width / 2.0 * 1.5, size.height - 40));
         this.scoreLabel_.enableShadow(cc.color.BLACK, cc.size(0.5, 0.5), 3);
         // cocos2d-js v3.3 ではまだ利用できなかった
         // this.scoreLabel_.enableOutline(cc.color.BLACK, 1.5);
         this.addChild(this.scoreLabel_);
+
+        // スコアヘッダーの追加
+        var scoreLabelHeader = new cc.LabelTTF("SCORE", "Times New Roman", 16);
+        scoreLabelHeader.setPosition(cc.p(size.width / 2.0 * 1.5, size.height - 20));
+        scoreLabelHeader.enableShadow(cc.color.BLACK, cc.size(0.5, 0.5), 3);
+        // cocos2d-js v3.3 ではまだ利用できなかった
+        // scoreLabelHeader.enableOutline(cc.color.BLACK, 1.5);
+        this.addChild(scoreLabelHeader);
 
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
