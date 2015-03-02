@@ -65,6 +65,9 @@ var MainSceneLayer = cc.Layer.extend({
 
         this.scoreLabel_ = new cc.LabelTTF(cc.formatStr("%d", this.score_), "Times New Roman", 16);
         this.scoreLabel_.setPosition(cc.p(size.width / 2.0 * 1.5, size.height - 40));
+        this.scoreLabel_.enableShadow(cc.color.BLACK, cc.size(0.5, 0.5), 3);
+        // cocos2d-js v3.3 ではまだ利用できなかった
+        // this.scoreLabel_.enableOutline(cc.color.BLACK, 1.5);
         this.addChild(this.scoreLabel_);
 
         // updateを毎フレーム実行するように登録する
