@@ -3,6 +3,7 @@ var MainSceneLayer = cc.Layer.extend({
     player_: null,
     fruits_: [],
     score_: 0,
+    second_: null,
     scoreLabel_: null,
 
     // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html#ctor
@@ -78,6 +79,16 @@ var MainSceneLayer = cc.Layer.extend({
         // cocos2d-js v3.3 ではまだ利用できなかった
         // scoreLabelHeader.enableOutline(cc.color.BLACK, 1.5);
         this.addChild(scoreLabelHeader);
+
+        // タイマーラベルの追加
+        this.second_ = MainSceneLayer.TIME_LIMIT_SECOND;
+        var second =  Math.floor(this.second_);
+        this.secondLabel_ = new cc.LabelTTF(cc.formatStr("%d", second), "Times New Roman", 16);
+        this.secondLabel_.setPosition(cc.p(size.width / 2.0, size.height - 40));
+        // cocos2d-js v3.3 ではまだ利用できなかった
+        // this.secondLabel_.enableOutline(cc.color.BLACK, 1.5);
+        this.secondLabel_.enableShadow(cc.color.BLACK, cc.size(0.5, 0.5), 3);
+        this.addChild(this.secondLabel_);
 
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
@@ -169,6 +180,8 @@ MainSceneLayer.FruitType = [
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
 // フルーツの出現率
 MainSceneLayer.FRUIT_SPAWN_RATE = 20;
+// 制限時間
+MainSceneLayer.TIME_LIMIT_SECOND = 60.0;
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
