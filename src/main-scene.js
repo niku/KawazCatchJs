@@ -110,35 +110,35 @@ var MainSceneLayer = cc.Layer.extend({
     update: function(dt) {
         if (this.state_ === MainSceneLayer.GameState["PLAING"]) { // プレイ中のとき
 
-        // 毎フレーム実行される
-        var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
-        if(random === 0) {
-            this.addFruit();
-        }
-
-        this.fruits_.forEach(function(element, index, array) {
-            var busketPosition = cc.pAdd(this.player_.getPosition(), cc.p(0, -10));
-            var boundingBox = element.getBoundingBox(); // フルーツの矩形を取り出す
-            var isHit = cc.rectContainsPoint(boundingBox, busketPosition);
-            if (isHit) {
-                this.catchFruit(element);
+            // 毎フレーム実行される
+            var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
+            if(random === 0) {
+                this.addFruit();
             }
-        }, this);
 
-        // 残り秒数を減らす
-        this.second_ -= dt;
-        // int 型にする
-        // JavaScript で小数点の整数部のみ利用するのに一番速い方法はビット演算を使う ( | 0 をつける ) こと
-        // http://stackoverflow.com/questions/596467/how-do-i-convert-a-float-to-a-whole-number-in-javascript
-        // Math.floor だと -0.1 が -1 になってしまう．
-        // ここでは -0.1 は 0 になってほしい．
-        var second =  this.second_ | 0;
-        this.secondLabel_.setString(cc.formatStr("%d", second));
+            this.fruits_.forEach(function(element, index, array) {
+                var busketPosition = cc.pAdd(this.player_.getPosition(), cc.p(0, -10));
+                var boundingBox = element.getBoundingBox(); // フルーツの矩形を取り出す
+                var isHit = cc.rectContainsPoint(boundingBox, busketPosition);
+                if (isHit) {
+                    this.catchFruit(element);
+                }
+            }, this);
 
-        if(this.second_ < 0) {
-            // リザルト状態へ移行
-            this.state_ = MainSceneLayer.GameState["RESULT"];
-        }
+            // 残り秒数を減らす
+            this.second_ -= dt;
+            // int 型にする
+            // JavaScript で小数点の整数部のみ利用するのに一番速い方法はビット演算を使う ( | 0 をつける ) こと
+            // http://stackoverflow.com/questions/596467/how-do-i-convert-a-float-to-a-whole-number-in-javascript
+            // Math.floor だと -0.1 が -1 になってしまう．
+            // ここでは -0.1 は 0 になってほしい．
+            var second =  this.second_ | 0;
+            this.secondLabel_.setString(cc.formatStr("%d", second));
+
+            if(this.second_ < 0) {
+                // リザルト状態へ移行
+                this.state_ = MainSceneLayer.GameState["RESULT"];
+            }
         }
     },
 
