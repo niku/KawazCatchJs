@@ -12,5 +12,11 @@ var res = {
 
 var g_resources = [];
 for (var i in res) {
-    g_resources.push(res[i]);
+    if(res[i].constructor === Array) {
+        for(var j in res[i]) {
+            g_resources.push(res[i][j]);
+        }
+    } else {
+        g_resources.push(res[i]);
+    }
 }
