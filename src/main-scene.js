@@ -4,6 +4,7 @@ var MainSceneLayer = cc.Layer.extend({
     fruits_: [],
     score_: 0,
     second_: null,
+    state_: null,
     scoreLabel_: null,
     secondLabel_: null,
 
@@ -99,11 +100,16 @@ var MainSceneLayer = cc.Layer.extend({
         // secondLabelHeader.enableOutline(cc.color.BLACK, 1.5);
         this.addChild(secondLabelHeader);
 
+        // ゲーム状態を初期化する
+        this.state_ = MainSceneLayer.GameState["PLAING"];
+
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
     },
 
     update: function(dt) {
+        if (this.state_ === MainSceneLayer.GameState["PLAING"]) { // プレイ中のとき
+
         // 毎フレーム実行される
         var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
         if(random === 0) {
@@ -128,6 +134,12 @@ var MainSceneLayer = cc.Layer.extend({
         // ここでは -0.1 は 0 になってほしい．
         var second =  this.second_ | 0;
         this.secondLabel_.setString(cc.formatStr("%d", second));
+
+        if(this.second_ < 0) {
+            // リザルト状態へ移行
+            this.state_ = MainSceneLayer.GameState["RESULT"];
+        }
+        }
     },
 
     addFruit: function() {
@@ -201,6 +213,11 @@ MainSceneLayer.FRUIT_TOP_MARGIN = 40;
 MainSceneLayer.FRUIT_SPAWN_RATE = 20;
 // 制限時間
 MainSceneLayer.TIME_LIMIT_SECOND = 60.0;
+// ゲームの状態を表す
+MainSceneLayer.GameState = {
+    "PLAYING": 0,
+    "RESULT":  1
+};
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
