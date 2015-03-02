@@ -5,6 +5,7 @@ var MainSceneLayer = cc.Layer.extend({
     score_: 0,
     second_: null,
     scoreLabel_: null,
+    secondLabel_: null,
 
     // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html#ctor
     ctor: function() {
@@ -89,6 +90,14 @@ var MainSceneLayer = cc.Layer.extend({
         // this.secondLabel_.enableOutline(cc.color.BLACK, 1.5);
         this.secondLabel_.enableShadow(cc.color.BLACK, cc.size(0.5, 0.5), 3);
         this.addChild(this.secondLabel_);
+
+        // タイマーヘッダーの追加
+        var secondLabelHeader = new cc.LabelTTF("TIME", "Times New Roman", 16);
+        secondLabelHeader.setPosition(cc.p(size.width / 2.0, size.height - 20));
+        secondLabelHeader.enableShadow(cc.color.BLACK, cc.size(0.5, 0.5), 3);
+        // cocos2d-js v3.3 ではまだ利用できなかった
+        // secondLabelHeader.enableOutline(cc.color.BLACK, 1.5);
+        this.addChild(secondLabelHeader);
 
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
