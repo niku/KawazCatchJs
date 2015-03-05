@@ -118,6 +118,16 @@ var MainSceneLayer = cc.Layer.extend({
                 this.catchFruit(element);
             }
         }, this);
+
+        // 残り秒数を減らす
+        this.second_ -= dt;
+        // int 型にする
+        // JavaScript で小数点の整数部のみ利用するのに一番速い方法はビット演算を使う ( | 0 をつける ) こと
+        // http://stackoverflow.com/questions/596467/how-do-i-convert-a-float-to-a-whole-number-in-javascript
+        // Math.floor だと -0.1 が -1 になってしまう．
+        // ここでは -0.1 は 0 になってほしい．
+        var second =  this.second_ | 0;
+        this.secondLabel_.setString(cc.formatStr("%d", second));
     },
 
     addFruit: function() {
