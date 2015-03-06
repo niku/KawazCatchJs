@@ -210,7 +210,8 @@ var MainSceneLayer = cc.Layer.extend({
                                                 res.replayButtonPressed,
                                                 function() {
                                                     var scene = new MainScene();
-                                                    cc.director.runScene(scene);
+                                                    var transition = new cc.TransitionFade(0.5, scene);
+                                                    cc.director.runScene(transition);
                                                 });
 
         // 「タイトルへ戻る」ボタン
