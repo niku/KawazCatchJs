@@ -219,6 +219,7 @@ var MainSceneLayer = cc.Layer.extend({
                                                     var scene = new MainScene();
                                                     var transition = new cc.TransitionFade(0.5, scene);
                                                     cc.director.runScene(transition);
+                                                    cc.audioEngine.playEffect(res.decideEffect, false);
                                                 });
 
         // 「タイトルへ戻る」ボタン
@@ -226,7 +227,7 @@ var MainSceneLayer = cc.Layer.extend({
                                                res.titleButtonPressed,
                                                function() {
                                                    // 「タイトルへ戻る」ボタンを押したときの処理
-                                                   // いまは何も実装していない
+                                                   cc.audioEngine.playEffect(res.decideEffect, false);
                                                });
 
         // 2つのボタンからメニューを作成する
