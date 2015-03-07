@@ -4,6 +4,7 @@ var MainSceneLayer = cc.Layer.extend({
     fruits_: [],
     score_: 0,
     second_: null,
+    state_: null,
     scoreLabel_: null,
     secondLabel_: null,
 
@@ -99,35 +100,46 @@ var MainSceneLayer = cc.Layer.extend({
         // secondLabelHeader.enableOutline(cc.color.BLACK, 1.5);
         this.addChild(secondLabelHeader);
 
+        // ゲーム状態を初期化する
+        this.state_ = MainSceneLayer.GameState["PLAING"];
+
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
     },
 
     update: function(dt) {
-        // 毎フレーム実行される
-        var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
-        if(random === 0) {
-            this.addFruit();
-        }
+        if (this.state_ === MainSceneLayer.GameState["PLAING"]) { // プレイ中のとき
 
-        this.fruits_.forEach(function(element, index, array) {
-            var busketPosition = cc.pAdd(this.player_.getPosition(), cc.p(0, -10));
-            var boundingBox = element.getBoundingBox(); // フルーツの矩形を取り出す
-            var isHit = cc.rectContainsPoint(boundingBox, busketPosition);
-            if (isHit) {
-                this.catchFruit(element);
+            // 毎フレーム実行される
+            var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
+            if(random === 0) {
+                this.addFruit();
             }
-        }, this);
 
-        // 残り秒数を減らす
-        this.second_ -= dt;
-        // int 型にする
-        // JavaScript で小数点の整数部のみ利用するのに一番速い方法はビット演算を使う ( | 0 をつける ) こと
-        // http://stackoverflow.com/questions/596467/how-do-i-convert-a-float-to-a-whole-number-in-javascript
-        // Math.floor だと -0.1 が -1 になってしまう．
-        // ここでは -0.1 は 0 になってほしい．
-        var second =  this.second_ | 0;
-        this.secondLabel_.setString(cc.formatStr("%d", second));
+            this.fruits_.forEach(function(element, index, array) {
+                var busketPosition = cc.pAdd(this.player_.getPosition(), cc.p(0, -10));
+                var boundingBox = element.getBoundingBox(); // フルーツの矩形を取り出す
+                var isHit = cc.rectContainsPoint(boundingBox, busketPosition);
+                if (isHit) {
+                    this.catchFruit(element);
+                }
+            }, this);
+
+            // 残り秒数を減らす
+            this.second_ -= dt;
+            // int 型にする
+            // JavaScript で小数点の整数部のみ利用するのに一番速い方法はビット演算を使う ( | 0 をつける ) こと
+            // http://stackoverflow.com/questions/596467/how-do-i-convert-a-float-to-a-whole-number-in-javascript
+            // Math.floor だと -0.1 が -1 になってしまう．
+            // ここでは -0.1 は 0 になってほしい．
+            var second =  this.second_ | 0;
+            this.secondLabel_.setString(cc.formatStr("%d", second));
+
+            if(this.second_ < 0) {
+                // リザルト状態へ移行
+                this.state_ = MainSceneLayer.GameState["RESULT"];
+            }
+        }
     },
 
     addFruit: function() {
@@ -201,6 +213,11 @@ MainSceneLayer.FRUIT_TOP_MARGIN = 40;
 MainSceneLayer.FRUIT_SPAWN_RATE = 20;
 // 制限時間
 MainSceneLayer.TIME_LIMIT_SECOND = 60.0;
+// ゲームの状態を表す
+MainSceneLayer.GameState = {
+    "PLAYING": 0,
+    "RESULT":  1
+};
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
