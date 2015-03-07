@@ -12,7 +12,9 @@ var res = {
     replayButtonPressed: "res/images/replay_button_pressed.png",
     titleButton: "res/images/title_button.png",
     titleButtonPressed: "res/images/title_button_pressed.png",
-    mainMusic: "res/bgm/main.mp3"
+    mainMusic: "res/bgm/main.mp3",
+    catchFruitEffect: "res/se/catch_fruit.mp3",
+    decideEffect: "res/se/decide.mp3"
 };
 
 var g_resources = [];
