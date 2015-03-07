@@ -205,6 +205,7 @@ var MainSceneLayer = cc.Layer.extend({
         this.removeFruit(fruit);
         this.score_ += 1;
         this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
+        cc.audioEngine.playEffect(res.catchFruitEffect, false);
     },
 
     onResult: function() {
