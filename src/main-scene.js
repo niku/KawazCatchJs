@@ -138,6 +138,7 @@ var MainSceneLayer = cc.Layer.extend({
             if(this.second_ < 0) {
                 // リザルト状態へ移行
                 this.state_ = MainSceneLayer.GameState["RESULT"];
+                this.onResult();
             }
         }
     },
@@ -198,7 +199,35 @@ var MainSceneLayer = cc.Layer.extend({
         this.removeFruit(fruit);
         this.score_ += 1;
         this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
-    }
+    },
+
+    onResult: function() {
+        this.state_ = MainSceneLayer.GameState["RESULT"];
+        var winSize = cc.director.getWinSize();
+
+        // 「もう一度遊ぶ」ボタン
+        var replayButton = new cc.MenuItemImage(res.replayButton,
+                                                res.replayButtonPressed,
+                                                function() {
+                                                    var scene = new MainScene();
+                                                    cc.director.runScene(scene);
+                                                });
+
+        // 「タイトルへ戻る」ボタン
+        var titleButton = new cc.MenuItemImage(res.titleButton,
+                                               res.titleButtonPressed,
+                                               function() {
+                                                   // 「タイトルへ戻る」ボタンを押したときの処理
+                                                   // いまは何も実装していない
+                                               });
+
+        // 2つのボタンからメニューを作成する
+        var menu = new cc.Menu(replayButton, titleButton);
+        // ボタンを縦に並べる
+        menu.alignItemsVerticallyWithPadding(15); // ボタンを縦に並べる
+        menu.setPosition(cc.p(winSize.width / 2.0, winSize.height / 2.0));
+        this.addChild(menu);
+    },
 });
 MainSceneLayer.FruitType = [
     "APPLE",
