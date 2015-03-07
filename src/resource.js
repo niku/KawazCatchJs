@@ -11,7 +11,8 @@ var res = {
     replayButton: "res/images/replay_button.png",
     replayButtonPressed: "res/images/replay_button_pressed.png",
     titleButton: "res/images/title_button.png",
-    titleButtonPressed: "res/images/title_button_pressed.png"
+    titleButtonPressed: "res/images/title_button_pressed.png",
+    mainMusic: "res/bgm/main.mp3"
 };
 
 var g_resources = [];
