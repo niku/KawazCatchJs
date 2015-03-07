@@ -143,6 +143,12 @@ var MainSceneLayer = cc.Layer.extend({
         }
     },
 
+    // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Node.html#onEnterTransitionDidFinish
+    onEnterTransitionDidFinish: function() {
+        this._super();
+        cc.audioEngine.playMusic(res.mainMusic, true);
+    },
+
     addFruit: function() {
         // 画面サイズを取り出す
         var winSize = cc.director.getWinSize();
