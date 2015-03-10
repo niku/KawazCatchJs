@@ -243,7 +243,8 @@ MainSceneLayer.FruitType = [
     "GRAPE",
     "ORANGE",
     "BANANA",
-    "CHERRY"
+    "CHERRY",
+    "GOLDEN"
 ];
 // フルーツの画面上端からのマージン(px)
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
