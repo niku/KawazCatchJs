@@ -3,6 +3,7 @@ var MainSceneLayer = cc.Layer.extend({
     player_: null,
     fruits_: [],
     score_: 0,
+    isCrash_: false,
     second_: null,
     state_: null,
     scoreLabel_: null,
