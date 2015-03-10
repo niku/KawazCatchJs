@@ -202,10 +202,18 @@ var MainSceneLayer = cc.Layer.extend({
     },
 
     catchFruit: function(fruit) {
+        var fruitType = fruit.getTag();
+        switch(MainSceneLayer.FruitType[fruitType]) {
+        case "GOLDEN":
+            this.score_ += MainSceneLayer.GOLDEN_FRUIT_SCORE;
+            cc.audioEngine.playEffect(res.catchGoldenEffect, false);
+            break;
+        default:
+            this.score_ += 1;
+            cc.audioEngine.playEffect(res.catchFruitEffect, false);
+        }
         this.removeFruit(fruit);
-        this.score_ += 1;
         this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
-        cc.audioEngine.playEffect(res.catchFruitEffect, false);
     },
 
     onResult: function() {
@@ -246,6 +254,8 @@ MainSceneLayer.FruitType = [
     "CHERRY",
     "GOLDEN"
 ];
+// 黄金のフルーツを取ったときの点数
+MainSceneLayer.GOLDEN_FRUIT_SCORE = 5;
 // フルーツの画面上端からのマージン(px)
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
 // フルーツの出現率
