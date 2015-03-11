@@ -205,6 +205,11 @@ var MainSceneLayer = cc.Layer.extend({
     },
 
     catchFruit: function(fruit) {
+        // もしクラッシュしてたら，フルーツを取得できない
+        if(this.isCrash_) {
+            return;
+        }
+
         var fruitType = fruit.getTag();
         switch(MainSceneLayer.FruitType[fruitType]) {
         case "GOLDEN":
