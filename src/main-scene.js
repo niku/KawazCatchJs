@@ -48,6 +48,7 @@ var MainSceneLayer = cc.Layer.extend({
                 return true;
             }.bind(this),
             onTouchMoved: function(touch, event) {
+                if(!this.isCrash_) {
                 // タッチ中に動いたときの処理
                 // touch には Touch オブジェクトが渡されてくる
                 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Touch.html
@@ -64,6 +65,7 @@ var MainSceneLayer = cc.Layer.extend({
                 var winSize = cc.director.getWinSize();
 
                 this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
+                }
             }.bind(this)
         }, this);
 
