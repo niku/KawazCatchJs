@@ -18,6 +18,7 @@ var res = {
     mainMusic: "res/bgm/main.mp3",
     catchFruitEffect: "res/se/catch_fruit.mp3",
     catchGoldenEffect: "res/se/catch_golden.mp3",
+    catchBombEffect: "res/se/catch_bomb.mp3",
     crashEffect: "res/se/crash.mp3",
     decideEffect: "res/se/decide.mp3"
 };

@@ -216,6 +216,10 @@ var MainSceneLayer = cc.Layer.extend({
             this.score_ += MainSceneLayer.GOLDEN_FRUIT_SCORE;
             cc.audioEngine.playEffect(res.catchGoldenEffect, false);
             break;
+        case "BOMB":
+            this.onCatchBomb();
+            cc.audioEngine.playEffect(res.catchBombEffect, false);
+            break;
         default:
             this.score_ += 1;
             cc.audioEngine.playEffect(res.catchFruitEffect, false);
