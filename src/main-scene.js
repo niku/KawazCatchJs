@@ -3,6 +3,7 @@ var MainSceneLayer = cc.Layer.extend({
     player_: null,
     fruits_: [],
     score_: 0,
+    isCrash_: false,
     second_: null,
     state_: null,
     scoreLabel_: null,
@@ -47,22 +48,24 @@ var MainSceneLayer = cc.Layer.extend({
                 return true;
             }.bind(this),
             onTouchMoved: function(touch, event) {
-                // タッチ中に動いたときの処理
-                // touch には Touch オブジェクトが渡されてくる
-                // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Touch.html
+                if(!this.isCrash_) {
+                    // タッチ中に動いたときの処理
+                    // touch には Touch オブジェクトが渡されてくる
+                    // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Touch.html
 
-                // 前回とのタッチ位置との差をベクトルで取得する
-                var delta = touch.getDelta();
+                    // 前回とのタッチ位置との差をベクトルで取得する
+                    var delta = touch.getDelta();
 
-                // 現在のかわずたんの座標を取得する
-                var position = this.player_.getPosition();
+                    // 現在のかわずたんの座標を取得する
+                    var position = this.player_.getPosition();
 
-                // 現在座標 + 移動量を新たな座標にする
-                var newPosition = cc.pAdd(position, delta);
+                    // 現在座標 + 移動量を新たな座標にする
+                    var newPosition = cc.pAdd(position, delta);
 
-                var winSize = cc.director.getWinSize();
+                    var winSize = cc.director.getWinSize();
 
-                this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
+                    this.player_.setPosition(cc.pClamp(newPosition, cc.p(0, position.y), cc.p(winSize.width, position.y)));
+                }
             }.bind(this)
         }, this);
 
@@ -202,11 +205,20 @@ var MainSceneLayer = cc.Layer.extend({
     },
 
     catchFruit: function(fruit) {
+        // もしクラッシュしてたら，フルーツを取得できない
+        if(this.isCrash_) {
+            return;
+        }
+
         var fruitType = fruit.getTag();
         switch(MainSceneLayer.FruitType[fruitType]) {
         case "GOLDEN":
             this.score_ += MainSceneLayer.GOLDEN_FRUIT_SCORE;
             cc.audioEngine.playEffect(res.catchGoldenEffect, false);
+            break;
+        case "BOMB":
+            this.onCatchBomb();
+            cc.audioEngine.playEffect(res.catchBombEffect, false);
             break;
         default:
             this.score_ += 1;
@@ -214,6 +226,33 @@ var MainSceneLayer = cc.Layer.extend({
         }
         this.removeFruit(fruit);
         this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
+    },
+
+    onCatchBomb: function() {
+        // クラッシュ状態にする
+        this.isCrash_ = true;
+
+        // アニメーションの作成
+        var frames = [];
+        var playerSize = this.player_.getContentSize();
+        var animationFrameCount = 3; // アニメーションのフレーム数
+        // アニメ用のフレームを読み込む
+        for(i=0; i<animationFrameCount; ++i) {
+            var rect = cc.rect(playerSize.width * i, 0, playerSize.width, playerSize.height);
+            var frame = new cc.SpriteFrame(res.playerCrash, rect);
+            frames.push(frame);
+        }
+
+        // アニメーションを作成する
+        var animation = new cc.Animation(frames, 10.0 / 60.0);
+        animation.setLoops(3); // 3回繰り返して再生する
+        animation.setRestoreOriginalFrame(true);
+        this.player_.runAction(cc.sequence(cc.animate(animation),
+                                           cc.callFunc(function() {
+                                               this.isCrash_ = false;
+                                           }, this)));
+        this.score_ = Math.max(0, this.score_ - MainSceneLayer.BOMB_PENALTY_SCORE); // 4点引いて0点未満になったら0点にする
+        cc.audioEngine.playEffect(res.crashEffect);
     },
 
     onResult: function() {
@@ -252,10 +291,13 @@ MainSceneLayer.FruitType = [
     "ORANGE",
     "BANANA",
     "CHERRY",
-    "GOLDEN"
+    "GOLDEN",
+    "BOMB"
 ];
 // 黄金のフルーツを取ったときの点数
 MainSceneLayer.GOLDEN_FRUIT_SCORE = 5;
+/// 爆弾を取ったときのマイナス点
+MainSceneLayer.BOMB_PENALTY_SCORE = 4;
 // フルーツの画面上端からのマージン(px)
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
 // フルーツの出現率
