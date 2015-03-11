@@ -217,6 +217,33 @@ var MainSceneLayer = cc.Layer.extend({
         this.scoreLabel_.setString(cc.formatStr("%d", this.score_));
     },
 
+    onCatchBomb: function() {
+        // クラッシュ状態にする
+        this.isCrash_ = true;
+
+        // アニメーションの作成
+        var frames = [];
+        var playerSize = this.player_.getContentSize();
+        var animationFrameCount = 3; // アニメーションのフレーム数
+        // アニメ用のフレームを読み込む
+        for(i=0; i<animationFrameCount; ++i) {
+            var rect = cc.rect(playerSize.width * i, 0, playerSize.width, playerSize.height);
+            var frame = new cc.SpriteFrame(res.playerCrash, rect);
+            frames.push(frame);
+        }
+
+        // アニメーションを作成する
+        var animation = new cc.Animation(frames, 10.0 / 60.0);
+        animation.setLoops(3); // 3回繰り返して再生する
+        animation.setRestoreOriginalFrame(true);
+        this.player_.runAction(cc.sequence(cc.animate(animation),
+                                           cc.callFunc(function() {
+                                               this.isCrash_ = false;
+                                           }, this)));
+        this.score_ = Math.max(0, this.score_ - MainSceneLayer.BOMB_PENALTY_SCORE); // 4点引いて0点未満になったら0点にする
+        cc.audioEngine.playEffect(res.crashEffect);
+    },
+
     onResult: function() {
         this.state_ = MainSceneLayer.GameState["RESULT"];
         var winSize = cc.director.getWinSize();
@@ -253,10 +280,13 @@ MainSceneLayer.FruitType = [
     "ORANGE",
     "BANANA",
     "CHERRY",
-    "GOLDEN"
+    "GOLDEN",
+    "BOMB"
 ];
 // 黄金のフルーツを取ったときの点数
 MainSceneLayer.GOLDEN_FRUIT_SCORE = 5;
+/// 爆弾を取ったときのマイナス点
+MainSceneLayer.BOMB_PENALTY_SCORE = 4;
 // フルーツの画面上端からのマージン(px)
 MainSceneLayer.FRUIT_TOP_MARGIN = 40;
 // フルーツの出現率
