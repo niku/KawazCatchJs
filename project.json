@@ -12,6 +12,7 @@
 
     "jsList" : [
         "src/resource.js",
-        "src/main-scene.js"
+        "src/main-scene.js",
+        "src/title-scene.js"
     ]
 }
