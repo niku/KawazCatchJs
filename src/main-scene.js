@@ -273,7 +273,9 @@ var MainSceneLayer = cc.Layer.extend({
         var titleButton = new cc.MenuItemImage(res.titleButton,
                                                res.titleButtonPressed,
                                                function() {
-                                                   // 「タイトルへ戻る」ボタンを押したときの処理
+                                                   var scene = new TitleScene();
+                                                   var transition = new cc.TransitionFade(1.0, scene);
+                                                   cc.director.runScene(transition);
                                                    cc.audioEngine.playEffect(res.decideEffect, false);
                                                });
 
