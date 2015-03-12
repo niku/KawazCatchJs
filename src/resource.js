@@ -1,5 +1,8 @@
 var res = {
     background: "res/images/background.png",
+    titleBackground: "res/images/title_background.png",
+    titleLogo: "res/images/title_logo.png",
+    titleStart: "res/images/title_start.png",
     player: "res/images/player.png",
     playerCrash: "res/images/player_crash.png",
     fruits: [
@@ -16,6 +19,7 @@ var res = {
     titleButton: "res/images/title_button.png",
     titleButtonPressed: "res/images/title_button_pressed.png",
     mainMusic: "res/bgm/main.mp3",
+    titleMusic: "res/bgm/title.mp3",
     catchFruitEffect: "res/se/catch_fruit.mp3",
     catchGoldenEffect: "res/se/catch_golden.mp3",
     catchBombEffect: "res/se/catch_bomb.mp3",
