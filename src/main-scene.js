@@ -111,7 +111,7 @@ var MainSceneLayer = cc.Layer.extend({
     },
 
     update: function(dt) {
-        if (this.state_ === MainSceneLayer.GameState["PLAING"]) { // プレイ中のとき
+        if (this.state_ === MainSceneLayer.GameState["PLAYING"]) { // プレイ中のとき
 
             // 毎フレーム実行される
             var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
