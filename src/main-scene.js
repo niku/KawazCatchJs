@@ -104,7 +104,7 @@ var MainSceneLayer = cc.Layer.extend({
         this.addChild(secondLabelHeader);
 
         // ゲーム状態を初期化する
-        this.state_ = MainSceneLayer.GameState["PLAING"];
+        this.state_ = MainSceneLayer.GameState["READY"];
 
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
@@ -150,6 +150,7 @@ var MainSceneLayer = cc.Layer.extend({
     onEnterTransitionDidFinish: function() {
         this._super();
         cc.audioEngine.playMusic(res.mainMusic, true);
+        this.addReadyLabel();
     },
 
     addFruit: function() {
@@ -255,6 +256,36 @@ var MainSceneLayer = cc.Layer.extend({
         cc.audioEngine.playEffect(res.crashEffect);
     },
 
+    addReadyLabel: function() {
+        var winSize = cc.director.getWinSize();
+        var center = cc.p(winSize.width / 2.0, winSize.height / 2.0);
+
+        // Readyの文字を定義する
+        var ready = new cc.Sprite(res.ready);
+        ready.setScale(0);
+        ready.setPosition(center);
+        this.addChild(ready);
+
+        // STARTの文字を定義する
+        var start = new cc.Sprite(res.start);
+        start.runAction(cc.sequence(cc.spawn(cc.scaleTo(0.5, 5.0).easing(cc.easeIn(0.5)),
+                                             cc.fadeOut(0.5)), // 0.5秒かけて拡大とフェードアウトを同時に行う
+                                    cc.removeSelf())); // 自分を削除する
+        start.setPosition(center);
+
+        // READYにアニメーションを追加する
+        ready.runAction(cc.sequence(cc.scaleTo(0.25, 1), // 0.25秒かけて等倍に拡大する
+                                    cc.delayTime(1.0), // 1.0秒待つ
+                                    cc.callFunc(function() {
+                                        // 「START」のラベルを追加する(ここからアニメーションが始まる)
+                                        this.addChild(start);
+                                        // ゲーム状態をPLAYINGに切り替える
+                                        this.state_ = MainSceneLayer.GameState["PLAYING"];
+                                        cc.audioEngine.playEffect(res.startEffect);
+                                    }, this),
+                                    cc.removeSelf())); // 自分を削除する
+    },
+
     onResult: function() {
         this.state_ = MainSceneLayer.GameState["RESULT"];
         var winSize = cc.director.getWinSize();
@@ -308,8 +339,10 @@ MainSceneLayer.FRUIT_SPAWN_RATE = 20;
 MainSceneLayer.TIME_LIMIT_SECOND = 60.0;
 // ゲームの状態を表す
 MainSceneLayer.GameState = {
-    "PLAYING": 0,
-    "RESULT":  1
+    "READY":   0, // 開始演出中
+    "PLAYING": 1, // プレイ中
+    "ENDING":  2, // 終了演出中
+    "RESULT":  3  // スコア表示
 };
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
