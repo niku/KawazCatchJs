@@ -140,8 +140,27 @@ var MainSceneLayer = cc.Layer.extend({
 
             if(this.second_ < 0) {
                 // リザルト状態へ移行
-                this.state_ = MainSceneLayer.GameState["RESULT"];
-                this.onResult();
+                this.state_ = MainSceneLayer.GameState["ENDING"]; // ゲーム状態をENDINGに移行
+                // 終了文字の表示
+                var finish = new cc.Sprite(res.finish);
+                var winSize = cc.director.getWinSize();
+                finish.setPosition(cc.p(winSize.width / 2.0, winSize.height / 2.0));
+                finish.setScale(0);
+                cc.audioEngine.playEffect(res.finishEffect);
+
+                // アクションの作成
+                var appear = cc.scaleTo(0.25, 1.0).easing(cc.easeExponentialIn());
+                var disapper = cc.scaleTo(0.25, 0).easing(cc.easeExponentialIn());
+
+                finish.runAction(cc.sequence(appear,
+                                             cc.delayTime(2.0),
+                                             disapper,
+                                             cc.delayTime(1.0),
+                                             cc.callFunc(function() {
+                                                 this.state_ = MainSceneLayer.GameState["RESULT"];
+                                                 this.onResult();
+                                             }, this)));
+                this.addChild(finish);
             }
         }
     },
@@ -287,7 +306,6 @@ var MainSceneLayer = cc.Layer.extend({
     },
 
     onResult: function() {
-        this.state_ = MainSceneLayer.GameState["RESULT"];
         var winSize = cc.director.getWinSize();
 
         // 「もう一度遊ぶ」ボタン

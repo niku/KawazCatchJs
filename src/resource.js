@@ -5,6 +5,7 @@ var res = {
     titleStart: "res/images/title_start.png",
     ready: "res/images/ready.png",
     start: "res/images/start.png",
+    finish: "res/images/finish.png",
     player: "res/images/player.png",
     playerCrash: "res/images/player_crash.png",
     fruits: [
@@ -27,7 +28,8 @@ var res = {
     catchBombEffect: "res/se/catch_bomb.mp3",
     crashEffect: "res/se/crash.mp3",
     decideEffect: "res/se/decide.mp3",
-    startEffect: "res/se/start.mp3"
+    startEffect: "res/se/start.mp3",
+    finishEffect: "res/se/finish.mp3"
 };
 
 var g_resources = [];
