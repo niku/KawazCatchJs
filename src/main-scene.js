@@ -8,6 +8,7 @@ var MainSceneLayer = cc.Layer.extend({
     state_: null,
     scoreLabel_: null,
     secondLabel_: null,
+    fruitsBatchNode_: null,
 
     // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Layer.html#ctor
     ctor: function() {
@@ -106,6 +107,10 @@ var MainSceneLayer = cc.Layer.extend({
         // ゲーム状態を初期化する
         this.state_ = MainSceneLayer.GameState["READY"];
 
+        // BatchNodeの初期化
+        this.fruitsBatchNode_ = new cc.SpriteBatchNode(res.fruits);
+        this.addChild(this.fruitsBatchNode_);
+
         // updateを毎フレーム実行するように登録する
         this.scheduleUpdate();
     },
@@ -176,13 +181,20 @@ var MainSceneLayer = cc.Layer.extend({
         // 画面サイズを取り出す
         var winSize = cc.director.getWinSize();
 
-
         // フルーツの種類の数を上限としたランダムな整数を取得する
         // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
         // の「min から max までの乱整数を返す関数」を参考にした
         var randomFruitNumber = Math.floor(cc.random0To1() * (MainSceneLayer.FruitType.length));
         // フルーツを作成する
-        var fruit = new cc.Sprite(res.fruits[randomFruitNumber]);
+        var textureSize = this.fruitsBatchNode_.getTextureAtlas().getTexture().getContentSize();
+        var fruitWidth = (textureSize.width / MainSceneLayer.FruitType.length);
+        var fruit = new cc.Sprite(res.fruits, cc.rect(fruitWidth * randomFruitNumber,
+                                                      0,
+                                                      // TODO
+                                                      // フルーツの右側に縦に線が入るのを回避するため
+                                                      // 幅を1ピクセル減らした．あとで原因を追求すること．
+                                                      fruitWidth - 1,
+                                                      textureSize.height));
         fruit.setTag(randomFruitNumber); // フルーツの種類をタグとして指定する
 
         var fruitSize = fruit.getContentSize(); // フルーツのサイズを取り出す
@@ -190,7 +202,7 @@ var MainSceneLayer = cc.Layer.extend({
 
         fruit.setPosition(cc.p(fruitXPos,
                                winSize.height - MainSceneLayer.FRUIT_TOP_MARGIN - fruitSize.height / 2.0));
-        this.addChild(fruit);
+        this.fruitsBatchNode_.addChild(fruit); // BatchNodeにフルーツを追加する
         this.fruits_.push(fruit);
 
         // 地面の座標

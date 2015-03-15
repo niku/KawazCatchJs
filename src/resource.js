@@ -8,15 +8,7 @@ var res = {
     finish: "res/images/finish.png",
     player: "res/images/player.png",
     playerCrash: "res/images/player_crash.png",
-    fruits: [
-        "res/images/fruit0.png",
-        "res/images/fruit1.png",
-        "res/images/fruit2.png",
-        "res/images/fruit3.png",
-        "res/images/fruit4.png",
-        "res/images/fruit5.png",
-        "res/images/fruit6.png"
-    ],
+    fruits: "res/images/fruits.png",
     replayButton: "res/images/replay_button.png",
     replayButtonPressed: "res/images/replay_button_pressed.png",
     titleButton: "res/images/title_button.png",
