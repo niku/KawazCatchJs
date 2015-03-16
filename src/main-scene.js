@@ -205,14 +205,21 @@ var MainSceneLayer = cc.Layer.extend({
         this.fruitsBatchNode_.addChild(fruit); // BatchNodeにフルーツを追加する
         this.fruits_.push(fruit);
 
+        // 左右に揺れるアクション
+        var swing = cc.repeat(cc.sequence(cc.rotateTo(0.25, -30), cc.rotateTo(0.25, 30)) ,2);
         // 地面の座標
         var ground = cc.p(fruitXPos, 0);
         // 3秒かけてgroundの位置まで落下させるアクション
         var fall = cc.moveTo(3, ground);
         // removeFruitを即座に呼び出すアクション
         var remove = cc.callFunc(this.removeFruit, this, fruit);
-        // fallとremoveを連続して実行させるアクション
-        var sequence = cc.sequence(fall, remove);
+        // swing，fall，removeを連続して実行させるアクション
+        var sequence = cc.sequence(cc.scaleTo(0.25, 1),
+                                   swing,
+                                   cc.rotateTo(0, 0.125),
+                                   fall,
+                                   remove);
+        fruit.setScale(0);
         fruit.runAction(sequence);
 
         return fruit;
