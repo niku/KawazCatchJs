@@ -108,7 +108,7 @@ var MainSceneLayer = cc.Layer.extend({
         this.state_ = MainSceneLayer.GameState["READY"];
 
         // BatchNodeの初期化
-        this.fruitsBatchNode_ = new cc.SpriteBatchNode(res.fruits);
+        this.fruitsBatchNode_ = new cc.SpriteBatchNode(res.fruits, 128);
         this.addChild(this.fruitsBatchNode_);
 
         // updateを毎フレーム実行するように登録する
