@@ -118,9 +118,12 @@ var MainSceneLayer = cc.Layer.extend({
     update: function(dt) {
         if (this.state_ === MainSceneLayer.GameState["PLAYING"]) { // プレイ中のとき
 
-            // 毎フレーム実行される
-            var random = Math.floor(cc.random0To1() * (MainSceneLayer.FRUIT_SPAWN_RATE));
-            if(random === 0) {
+            var pastTime = MainSceneLayer.TIME_LIMIT_SECOND - this.second_; // 経過時間
+            var p = MainSceneLayer.FRUIT_SPAWN_INCREASE_BASE * (1 + Math.pow(MainSceneLayer.FRUIT_SPAWN_INCREASE_RATE, pastTime));
+            p = Math.min(p, MainSceneLayer.MAXIMUM_SPAWN_PROBABILITY);
+            var random = cc.random0To1();
+
+            if(random < p) {
                 this.addFruit();
             }
 
@@ -403,6 +406,13 @@ MainSceneLayer.GOLDEN_FRUIT_PROBABILITY_RATE = 0.001;
 MainSceneLayer.BOMB_PROBABILITY_RATE = 0.003;
 // 普通のフルーツの数
 MainSceneLayer.NORMAL_FRUIT_COUNT = 5;
+
+// フルーツ出現頻度の初期値
+MainSceneLayer.FRUIT_SPAWN_INCREASE_BASE = 0.02;
+// フルーツ出現頻度の増加率
+MainSceneLayer.FRUIT_SPAWN_INCREASE_RATE = 1.05;
+// フルーツ出現頻度の最大値
+MainSceneLayer.MAXIMUM_SPAWN_PROBABILITY = 0.5;
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
