@@ -181,21 +181,32 @@ var MainSceneLayer = cc.Layer.extend({
         // 画面サイズを取り出す
         var winSize = cc.director.getWinSize();
 
-        // フルーツの種類の数を上限としたランダムな整数を取得する
-        // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-        // の「min から max までの乱整数を返す関数」を参考にした
-        var randomFruitNumber = Math.floor(cc.random0To1() * (MainSceneLayer.FruitType.length));
+        // フルーツの種類を選択する
+        var fruitType = 0;
+        var r = cc.random0To1();
+        var pastSecond = MainSceneLayer.TIME_LIMIT_SECOND - this.second_; // 経過時間
+        var goldenFruitProbability = MainSceneLayer.GOLDEN_FRUIT_PROBABILITY_BASE + MainSceneLayer.GOLDEN_FRUIT_PROBABILITY_RATE * pastSecond;
+        var bombProbability = MainSceneLayer.BOMB_PROBABILITY_BASE + MainSceneLayer.BOMB_PROBABILITY_RATE * pastSecond;
+
+        if(r <= goldenFruitProbability) { // 黄金のフルーツ
+            fruitType = MainSceneLayer.FruitType.indexOf("GOLDEN");
+        } else if (r <= goldenFruitProbability + bombProbability) { // 爆弾
+            fruitType = MainSceneLayer.FruitType.indexOf("BOMB");
+        } else { // その他のフルーツ
+            fruitType = Math.floor(cc.random0To1() * MainSceneLayer.NORMAL_FRUIT_COUNT);
+        }
+
         // フルーツを作成する
         var textureSize = this.fruitsBatchNode_.getTextureAtlas().getTexture().getContentSize();
         var fruitWidth = (textureSize.width / MainSceneLayer.FruitType.length);
-        var fruit = new cc.Sprite(res.fruits, cc.rect(fruitWidth * randomFruitNumber,
+        var fruit = new cc.Sprite(res.fruits, cc.rect(fruitWidth * fruitType,
                                                       0,
                                                       // TODO
                                                       // フルーツの右側に縦に線が入るのを回避するため
                                                       // 幅を1ピクセル減らした．あとで原因を追求すること．
                                                       fruitWidth - 1,
                                                       textureSize.height));
-        fruit.setTag(randomFruitNumber); // フルーツの種類をタグとして指定する
+        fruit.setTag(fruitType); // フルーツの種類をタグとして指定する
 
         var fruitSize = fruit.getContentSize(); // フルーツのサイズを取り出す
         var fruitXPos = Math.floor(cc.random0To1() * (winSize.width)); // X軸のランダムな位置を選択する
@@ -381,6 +392,17 @@ MainSceneLayer.GameState = {
     "ENDING":  2, // 終了演出中
     "RESULT":  3  // スコア表示
 };
+
+// 黄金のフルーツが出る確率の初期値
+MainSceneLayer.GOLDEN_FRUIT_PROBABILITY_BASE = 0.02;
+// 爆弾が出る確率の初期値
+MainSceneLayer.BOMB_PROBABILITY_BASE = 0.05;
+// 黄金のフルーツが出る確率の増え幅
+MainSceneLayer.GOLDEN_FRUIT_PROBABILITY_RATE = 0.001;
+// 爆弾が出る確率の増え幅
+MainSceneLayer.BOMB_PROBABILITY_RATE = 0.003;
+// 普通のフルーツの数
+MainSceneLayer.NORMAL_FRUIT_COUNT = 5;
 
 // http://www.cocos2d-x.org/reference/html5-js/V3.2/symbols/cc.Scene.html
 var MainScene = cc.Scene.extend({
