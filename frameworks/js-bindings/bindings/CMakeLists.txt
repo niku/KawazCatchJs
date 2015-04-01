@@ -38,6 +38,8 @@ set(JSBINDING_SRC
   auto/jsb_cocos2dx_spine_auto.cpp
   auto/jsb_cocos2dx_studio_auto.cpp
   auto/jsb_cocos2dx_ui_auto.cpp
+  auto/jsb_cocos2dx_3d_auto.cpp
+  auto/jsb_cocos2dx_3d_extension_auto.cpp
   manual/ScriptingCore.cpp
   manual/cocos2d_specifics.cpp
   manual/js_manual_conversions.cpp
@@ -62,6 +64,7 @@ set(JSBINDING_SRC
   manual/network/jsb_socketio.cpp
   manual/spine/jsb_cocos2dx_spine_manual.cpp
   manual/ui/jsb_cocos2dx_ui_manual.cpp
+  manual/3d/jsb_cocos2dx_3d_manual.cpp
   ../cocos2d-x/cocos/storage/local-storage/LocalStorage.cpp
 )
 
@@ -94,6 +97,7 @@ add_library(jsbindings STATIC
 target_link_libraries(jsbindings
   sqlite3
   js_static
+  xxhash
 )
 
 set_target_properties(jsbindings

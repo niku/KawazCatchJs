@@ -101,12 +101,12 @@ cc.GLProgram = cc.Class.extend(/** @lends cc.GLProgram# */{
 
         if (!status) {
             cc.log("cocos2d: ERROR: Failed to compile shader:\n" + this._glContext.getShaderSource(shader));
-            if (type == this._glContext.VERTEX_SHADER)
+            if (type === this._glContext.VERTEX_SHADER)
                 cc.log("cocos2d: \n" + this.vertexShaderLog());
             else
                 cc.log("cocos2d: \n" + this.fragmentShaderLog());
         }
-        return ( status == 1 );
+        return ( status === true );
     },
 
 	/**
@@ -543,9 +543,9 @@ cc.GLProgram = cc.Class.extend(/** @lends cc.GLProgram# */{
      * will update the builtin uniforms if they are different than the previous call for this same shader program.
      */
     setUniformsForBuiltins: function () {
-        var matrixP = new cc.kmMat4();
-        var matrixMV = new cc.kmMat4();
-        var matrixMVP = new cc.kmMat4();
+        var matrixP = new cc.math.Matrix4();
+        var matrixMV = new cc.math.Matrix4();
+        var matrixMVP = new cc.math.Matrix4();
 
         cc.kmGLGetMatrix(cc.KM_GL_PROJECTION, matrixP);
         cc.kmGLGetMatrix(cc.KM_GL_MODELVIEW, matrixMV);
@@ -568,7 +568,7 @@ cc.GLProgram = cc.Class.extend(/** @lends cc.GLProgram# */{
             this.setUniformLocationWith4f(this._uniforms[cc.UNIFORM_COSTIME], time / 8.0, time / 4.0, time / 2.0, Math.cos(time));
         }
 
-        if (this._uniforms[cc.UNIFORM_RANDOM01] != -1)
+        if (this._uniforms[cc.UNIFORM_RANDOM01] !== -1)
             this.setUniformLocationWith4f(this._uniforms[cc.UNIFORM_RANDOM01], Math.random(), Math.random(), Math.random(), Math.random());
     },
 
@@ -576,9 +576,9 @@ cc.GLProgram = cc.Class.extend(/** @lends cc.GLProgram# */{
         if(!node || !node._renderCmd)
             return;
 
-        var matrixP = new cc.kmMat4();
+        var matrixP = new cc.math.Matrix4();
         //var matrixMV = new cc.kmMat4();
-        var matrixMVP = new cc.kmMat4();
+        var matrixMVP = new cc.math.Matrix4();
 
         cc.kmGLGetMatrix(cc.KM_GL_PROJECTION, matrixP);
         //cc.kmGLGetMatrix(cc.KM_GL_MODELVIEW, node._stackMatrix);
@@ -601,7 +601,7 @@ cc.GLProgram = cc.Class.extend(/** @lends cc.GLProgram# */{
             this.setUniformLocationWith4f(this._uniforms[cc.UNIFORM_COSTIME], time / 8.0, time / 4.0, time / 2.0, Math.cos(time));
         }
 
-        if (this._uniforms[cc.UNIFORM_RANDOM01] != -1)
+        if (this._uniforms[cc.UNIFORM_RANDOM01] !== -1)
             this.setUniformLocationWith4f(this._uniforms[cc.UNIFORM_RANDOM01], Math.random(), Math.random(), Math.random(), Math.random());
     },
 
@@ -737,7 +737,7 @@ cc.GLProgram._isHighpSupported = function(){
     if(cc.GLProgram._highpSupported == null){
         var ctx = cc._renderContext;
         var highp = ctx.getShaderPrecisionFormat(ctx.FRAGMENT_SHADER, ctx.HIGH_FLOAT);
-        cc.GLProgram._highpSupported = highp.precision != 0;
+        cc.GLProgram._highpSupported = highp.precision !== 0;
     }
     return cc.GLProgram._highpSupported;
 };

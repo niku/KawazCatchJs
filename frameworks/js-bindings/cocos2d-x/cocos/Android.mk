@@ -6,6 +6,8 @@ LOCAL_MODULE := cocos2dx_internal_static
 
 LOCAL_MODULE_FILENAME := libcocos2dxinternal
 
+LOCAL_ARM_MODE := arm
+
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 MATHNEONFILE := math/MathUtil.cpp.neon
 else

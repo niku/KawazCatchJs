@@ -186,6 +186,8 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
     _renderCmd:null,
 
+    _camera: null,
+
     /**
      * Constructor function, override it to extend the construction behavior, remember to call "this._super()" in the extended "ctor" function.
      * @function
@@ -446,7 +448,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Number} globalZOrder
      */
     setGlobalZOrder: function (globalZOrder) {
-        if (this._globalZOrder != globalZOrder) {
+        if (this._globalZOrder !== globalZOrder) {
             this._globalZOrder = globalZOrder;
             cc.eventManager._setDirtyForNode(this);
         }
@@ -966,7 +968,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Boolean} newValue true if anchor point will be ignored when you position this node
      */
     ignoreAnchorPointForPosition: function (newValue) {
-        if (newValue != this._ignoreAnchorPointForPosition) {
+        if (newValue !== this._ignoreAnchorPointForPosition) {
             this._ignoreAnchorPointForPosition = newValue;
             this._renderCmd.setDirtyFlag(cc.Node._dirtyFlags.transformDirty);
         }
@@ -1076,7 +1078,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {object} newValue A user cocos2d object
      */
     setUserObject: function (newValue) {
-        if (this.userObject != newValue)
+        if (this.userObject !== newValue)
             this.userObject = newValue;
     },
 
@@ -1125,7 +1127,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {cc.ActionManager} actionManager A CCActionManager object that is used by all actions.
      */
     setActionManager: function (actionManager) {
-        if (this._actionManager != actionManager) {
+        if (this._actionManager !== actionManager) {
             this.stopAllActions();
             this._actionManager = actionManager;
         }
@@ -1154,7 +1156,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param scheduler A cc.Scheduler object that is used to schedule all "update" and timers.
      */
     setScheduler: function (scheduler) {
-        if (this._scheduler != scheduler) {
+        if (this._scheduler !== scheduler) {
             this.unscheduleAllCallbacks();
             this._scheduler = scheduler;
         }
@@ -1206,10 +1208,10 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     getChildByTag: function (aTag) {
         var __children = this._children;
-        if (__children != null) {
+        if (__children !== null) {
             for (var i = 0; i < __children.length; i++) {
                 var node = __children[i];
-                if (node && node.tag == aTag)
+                if (node && node.tag === aTag)
                     return node;
             }
         }
@@ -1230,7 +1232,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
         var locChildren = this._children;
         for(var i = 0, len = locChildren.length; i < len; i++){
-           if(locChildren[i]._name == name)
+           if(locChildren[i]._name === name)
             return locChildren[i];
         }
         return null;
@@ -1378,7 +1380,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     removeAllChildren: function (cleanup) {
         // not using detachChild improves speed here
         var __children = this._children;
-        if (__children != null) {
+        if (__children !== null) {
             if (cleanup == null)
                 cleanup = true;
             for (var i = 0; i < __children.length; i++) {
@@ -1494,7 +1496,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
     // Internal use only, do not call it by yourself,
     transformAncestors: function () {
-        if (this._parent != null) {
+        if (this._parent !== null) {
             this._parent.transformAncestors();
             this._parent.transform();
         }
@@ -1652,7 +1654,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Number} priority
      */
     scheduleUpdateWithPriority: function (priority) {
-        this.scheduler.scheduleUpdateForTarget(this, priority, !this._running);
+        this.scheduler.scheduleUpdate(this, priority, !this._running);
     },
 
     /**
@@ -1661,39 +1663,93 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @see cc.Node#scheduleUpdate
      */
     unscheduleUpdate: function () {
-        this.scheduler.unscheduleUpdateForTarget(this);
+        this.scheduler.unscheduleUpdate(this);
     },
 
     /**
      * <p>Schedules a custom selector.         <br/>
      * If the selector is already scheduled, then the interval parameter will be updated without scheduling it again.</p>
      * @function
-     * @param {function} callback_fn A function wrapped as a selector
+     * @param {function} callback A function wrapped as a selector
      * @param {Number} interval  Tick interval in seconds. 0 means tick every frame. If interval = 0, it's recommended to use scheduleUpdate() instead.
      * @param {Number} repeat    The selector will be executed (repeat + 1) times, you can use kCCRepeatForever for tick infinitely.
      * @param {Number} delay     The amount of time that the first tick will wait before execution.
+     * @param {String} key The only string identifying the callback
      */
-    schedule: function (callback_fn, interval, repeat, delay) {
-        interval = interval || 0;
+    schedule: function (callback, interval, repeat, delay, key) {
+        var len = arguments.length;
+        if(typeof callback === "function"){
+            //callback, interval, repeat, delay, key
+            if(len === 1){
+                //callback
+                interval = 0;
+                repeat = cc.REPEAT_FOREVER;
+                delay = 0;
+                key = this.__instanceId;
+            }else if(len === 2){
+                if(typeof interval === "number"){
+                    //callback, interval
+                    repeat = cc.REPEAT_FOREVER;
+                    delay = 0;
+                    key = this.__instanceId;
+                }else{
+                    //callback, key
+                    key = interval;
+                    interval = 0;
+                    repeat = cc.REPEAT_FOREVER;
+                    delay = 0;
+                }
+            }else if(len === 3){
+                if(typeof repeat === "string"){
+                    //callback, interval, key
+                    key = repeat;
+                    repeat = cc.REPEAT_FOREVER;
+                }else{
+                    //callback, interval, repeat
+                    key = this.__instanceId;
+                }
+                delay = 0;
+            }else if(len === 4){
+                key = this.__instanceId;
+            }
+        }else{
+            //selector
+            //selector, interval
+            //selector, interval, repeat, delay
+            if(len === 1){
+                interval = 0;
+                repeat = cc.REPEAT_FOREVER;
+                delay = 0;
+            }else if(len === 2){
+                repeat = cc.REPEAT_FOREVER;
+                delay = 0;
+            }
+        }
 
-        cc.assert(callback_fn, cc._LogInfos.Node_schedule);
+        cc.assert(callback, cc._LogInfos.Node_schedule);
         cc.assert(interval >= 0, cc._LogInfos.Node_schedule_2);
 
+        interval = interval || 0;
         repeat = (repeat == null) ? cc.REPEAT_FOREVER : repeat;
         delay = delay || 0;
 
-        this.scheduler.scheduleCallbackForTarget(this, callback_fn, interval, repeat, delay, !this._running);
+        this.scheduler.schedule(callback, this, interval, repeat, delay, !this._running, key);
     },
 
     /**
      * Schedules a callback function that runs only once, with a delay of 0 or larger
      * @function
      * @see cc.Node#schedule
-     * @param {function} callback_fn  A function wrapped as a selector
+     * @param {function} callback  A function wrapped as a selector
      * @param {Number} delay  The amount of time that the first tick will wait before execution.
+     * @param {String} key The only string identifying the callback
      */
-    scheduleOnce: function (callback_fn, delay) {
-        this.schedule(callback_fn, 0.0, 0, delay);
+    scheduleOnce: function (callback, delay, key) {
+        //selector, delay
+        //callback, delay, key
+        if(key === undefined)
+            key = this.__instanceId;
+        this.schedule(callback, 0, 0, delay, key);
     },
 
     /**
@@ -1703,10 +1759,12 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {function} callback_fn  A function wrapped as a selector
      */
     unschedule: function (callback_fn) {
+        //key
+        //selector
         if (!callback_fn)
             return;
 
-        this.scheduler.unscheduleCallbackForTarget(this, callback_fn);
+        this.scheduler.unschedule(callback_fn, this);
     },
 
     /**
@@ -1715,7 +1773,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @function
      */
     unscheduleAllCallbacks: function () {
-        this.scheduler.unscheduleAllCallbacksForTarget(this);
+        this.scheduler.unscheduleAllForTarget(this);
     },
 
     /**
@@ -1811,6 +1869,8 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * spriteB.setAdditionalTransform(t);
      */
     setAdditionalTransform: function (additionalTransform) {
+        if(additionalTransform == null)
+            return this._additionalTransformDirty = false;
         this._additionalTransform = additionalTransform;
         this._renderCmd.setDirtyFlag(cc.Node._dirtyFlags.transformDirty);
         this._additionalTransformDirty = true;
@@ -1842,7 +1902,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     getNodeToWorldTransform: function () {
         //TODO renderCmd has a WorldTransform
         var t = this.getNodeToParentTransform();
-        for (var p = this._parent; p != null; p = p.parent)
+        for (var p = this._parent; p !== null; p = p.parent)
             t = cc.affineTransformConcat(t, p.getNodeToParentTransform());
         return t;
     },

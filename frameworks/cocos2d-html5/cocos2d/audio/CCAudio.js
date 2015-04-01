@@ -32,6 +32,7 @@
  * auto         : Supports auto-play audio - if Don‘t support it, On a touch detecting background music canvas, and then replay
  * replay       : The first music will fail, must be replay after touchstart
  * emptied      : Whether to use the emptied event to replace load callback
+ * delay        : delay created the context object - only webAudio
  *
  * May be modifications for a few browser version
  */
@@ -48,7 +49,7 @@
     //  ANDROID  //
     supportTable[sys.BROWSER_TYPE_ANDROID]  = {multichannel: false, webAudio: false, auto: false};
     supportTable[sys.BROWSER_TYPE_CHROME]   = {multichannel: true , webAudio: true , auto: false};
-    supportTable[sys.BROWSER_TYPE_FIREFOX]  = {multichannel: true , webAudio: true , auto: true };
+    supportTable[sys.BROWSER_TYPE_FIREFOX]  = {multichannel: true , webAudio: true , auto: true , delay: true};
     supportTable[sys.BROWSER_TYPE_UC]       = {multichannel: true , webAudio: false, auto: false};
     supportTable[sys.BROWSER_TYPE_QQ]       = {multichannel: false, webAudio: false, auto: true };
     supportTable[sys.BROWSER_TYPE_OUPENG]   = {multichannel: false, webAudio: false, auto: false, replay: true , emptied: true };
@@ -120,7 +121,7 @@
                 break;
             case sys.BROWSER_TYPE_MIUI:
                 version = version.match(/\d+/g);
-                if(version[0] < 2 || (version[0] == 2 && version[1] == 0 && version[2] <= 1)){
+                if(version[0] < 2 || (version[0] === 2 && version[1] === 0 && version[2] <= 1)){
                     supportTable[sys.BROWSER_TYPE_MIUI].auto = false;
                 }
                 break;
@@ -128,16 +129,21 @@
     }
 
     if(cc.sys.isMobile){
-        if(cc.sys.os != cc.sys.OS_IOS)
+        if(cc.sys.os !== cc.sys.OS_IOS)
             cc.__audioSupport = supportTable[sys.browserType] || supportTable["common"];
         else
             cc.__audioSupport = supportTable[sys.BROWSER_TYPE_SAFARI];
     }else{
-        //Desktop support all
-        if(cc.sys.browserType != cc.sys.BROWSER_TYPE_IE)
-            cc.__audioSupport = supportTable["common"];
-        else
-            cc.__audioSupport = supportTable[sys.BROWSER_TYPE_IE];
+      switch(sys.browserType){
+          case sys.BROWSER_TYPE_IE:
+              cc.__audioSupport = supportTable[sys.BROWSER_TYPE_IE];
+              break;
+          case sys.BROWSER_TYPE_FIREFOX:
+              cc.__audioSupport = supportTable[sys.BROWSER_TYPE_FIREFOX];
+              break;
+          default:
+              cc.__audioSupport = supportTable["common"];
+      }
     }
 
     if(DEBUG){
@@ -194,7 +200,7 @@ cc.Audio = cc.Class.extend({
         var playing = this._playing;
         this._AUDIO_TYPE = "WEBAUDIO";
 
-        if(this._buffer && this._buffer != buffer && this.getPlaying())
+        if(this._buffer && this._buffer !== buffer && this.getPlaying())
             this.stop();
 
         this._buffer = buffer;
@@ -211,7 +217,7 @@ cc.Audio = cc.Class.extend({
         var playing = this._playing;
         this._AUDIO_TYPE = "AUDIO";
 
-        if(this._element && this._element != element && this.getPlaying())
+        if(this._element && this._element !== element && this.getPlaying())
             this.stop();
 
         this._element = element;
@@ -249,7 +255,7 @@ cc.Audio = cc.Class.extend({
                 return true;
         }else{
             var sourceNode = this._currentSource;
-            if(!this._playing && !sourceNode)
+            if(!sourceNode)
                 return true;
             if(sourceNode["playbackState"] == null)
                 return this._playing;
@@ -344,7 +350,7 @@ cc.Audio = cc.Class.extend({
         var audio = this._element;
         if(audio){
             audio.pause();
-            if (audio.duration && audio.duration != Infinity)
+            if (audio.duration && audio.duration !== Infinity)
                 audio.currentTime = 0;
         }
     },
@@ -476,6 +482,8 @@ cc.Audio = cc.Class.extend({
     try{
         if(SWA){
             var context = new (window.AudioContext || window.webkitAudioContext || window.mozAudioContext)();
+            if(polyfill.delay)
+                setTimeout(function(){ context = new (window.AudioContext || window.webkitAudioContext || window.mozAudioContext)(); }, 0);
         }
     }catch(error){
         SWA = false;
@@ -508,10 +516,16 @@ cc.Audio = cc.Class.extend({
                 return cb(null, loader.cache[url]);
 
             if(SWA){
-                var volume = context["createGain"]();
-                volume["gain"].value = 1;
-                volume["connect"](context["destination"]);
-                audio = new cc.Audio(context, volume, realUrl);
+                try{
+                    var volume = context["createGain"]();
+                    volume["gain"].value = 1;
+                    volume["connect"](context["destination"]);
+                    audio = new cc.Audio(context, volume, realUrl);
+                }catch(err){
+                    SWA = false;
+                    cc.log("browser don't support webAudio");
+                    audio = new cc.Audio(null, null, realUrl);
+                }
             }else{
                 audio = new cc.Audio(null, null, realUrl);
             }
@@ -562,7 +576,7 @@ cc.Audio = cc.Class.extend({
                 var termination = false;
 
                 var timer = setTimeout(function(){
-                    if(element.readyState == 0){
+                    if(element.readyState === 0){
                         emptied();
                     }else{
                         termination = true;

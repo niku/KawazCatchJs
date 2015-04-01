@@ -55,7 +55,7 @@
     };
 
     proto.setBatchNode = function(batchNode){
-        if (this._batchNode != batchNode) {
+        if (this._batchNode !== batchNode) {
             this._node._batchNode = batchNode;
         }
     };
@@ -129,7 +129,7 @@
 
                 context.save();
                 context.translate(0 | particle.drawPos.x, -(0 | particle.drawPos.y));
-                if (node.shapeType == cc.ParticleSystem.STAR_SHAPE) {
+                if (node.shapeType === cc.ParticleSystem.STAR_SHAPE) {
                     if (particle.rotation)
                         context.rotate(cc.degreesToRadians(particle.rotation));
                     drawTool.drawStar(wrapper, lpx, particle.color);
@@ -206,7 +206,7 @@
 
     proto._initWithTotalParticles = function(totalParticles){};
     proto._updateDeltaColor = function(selParticle, dt){
-        if (!this._dontTint) {
+        if (!this._node._dontTint) {
             selParticle.color.r += selParticle.deltaColor.r * dt;
             selParticle.color.g += selParticle.deltaColor.g * dt;
             selParticle.color.b += selParticle.deltaColor.b * dt;

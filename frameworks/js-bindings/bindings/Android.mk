@@ -6,12 +6,16 @@ LOCAL_MODULE := cocos_jsb_static
 
 LOCAL_MODULE_FILENAME := libcocos2dxjsb
 
+LOCAL_ARM_MODE := arm
+
 LOCAL_SRC_FILES := auto/jsb_cocos2dx_auto.cpp \
                    auto/jsb_cocos2dx_builder_auto.cpp \
                    auto/jsb_cocos2dx_extension_auto.cpp \
                    auto/jsb_cocos2dx_spine_auto.cpp \
                    auto/jsb_cocos2dx_studio_auto.cpp \
                    auto/jsb_cocos2dx_ui_auto.cpp \
+                   auto/jsb_cocos2dx_3d_auto.cpp \
+                   auto/jsb_cocos2dx_3d_extension_auto.cpp \
                    manual/ScriptingCore.cpp \
                    manual/cocos2d_specifics.cpp \
                    manual/js_manual_conversions.cpp \
@@ -36,7 +40,8 @@ LOCAL_SRC_FILES := auto/jsb_cocos2dx_auto.cpp \
                    manual/network/jsb_websocket.cpp \
                    manual/network/XMLHTTPRequest.cpp \
                    manual/spine/jsb_cocos2dx_spine_manual.cpp \
-                   manual/ui/jsb_cocos2dx_ui_manual.cpp
+                   manual/ui/jsb_cocos2dx_ui_manual.cpp \
+                   manual/3d/jsb_cocos2dx_3d_manual.cpp
                    
 
 LOCAL_CFLAGS := -DCOCOS2D_JAVASCRIPT

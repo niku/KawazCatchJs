@@ -102,7 +102,7 @@ ccui.ImageView = ccui.Widget.extend(/** @lends ccui.ImageView# */{
 
         if(!imageRenderer._textureLoaded){
             imageRenderer.addEventListener("load", function(){
-                self.loadTexture(fileName, texType);
+                self.loadTexture(self._textureFile, self._imageTexType);
             });
         }
 
@@ -154,7 +154,7 @@ ccui.ImageView = ccui.Widget.extend(/** @lends ccui.ImageView# */{
      */
     setScale9Enabled: function (able) {
         //todo setScale9Enabled
-        if (this._scale9Enabled == able)
+        if (this._scale9Enabled === able)
             return;
 
         this._scale9Enabled = able;
