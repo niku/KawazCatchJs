@@ -32,7 +32,7 @@ script:
 
 after_success:
   - (git clone git://github.com/$TRAVIS_REPO_SLUG.git $HOME/html --reference $TRAVIS_BUILD_DIR -b gh-pages && cd $HOME/html && git rm -rf .) || (git clone git://github.com/$TRAVIS_REPO_SLUG.git $HOME/html --reference $TRAVIS_BUILD_DIR && cd $HOME/html && git checkout --orphan gh-pages && git rm -rf .)
-  - mv runtime/html5/* $HOME/html/
+  - mv simulator/html5/* $HOME/html/
   - ruby -i -pe 'puts %Q!"sourceRoot":"https://raw.githubusercontent.com/#{ENV["TRAVIS_REPO_SLUG"]}/#{ENV["TRAVIS_COMMIT"]}",! if $. == 4' $HOME/html/sourcemap
   - ruby -i -pe 'gsub %r!"../../!, "\""' $HOME/html/sourcemap
-  - cd $HOME/html && git add . && git commit -a -m "Built by $TRAVIS_COMMIT" && git push --quiet https://$GH_TOKEN@github.com/$TRAVIS_REPO_SLUG.git gh-pages 2> /dev/null
+  - cd $HOME/html && git add . && git commit -a -m "Built by $TRAVIS_COMMIT" && git push --set-upstream --quiet https://$GH_TOKEN@github.com/$TRAVIS_REPO_SLUG.git gh-pages 2> /dev/null
