@@ -8,9 +8,9 @@
         <jscomp compilationLevel="advanced" 
                 warning="quiet"
                 debug="true" 
-                output="/Users/travis/build/niku/KawazCatchJs/runtime/html5/game.min.js"
+                output="/Users/travis/build/niku/KawazCatchJs/simulator/html5/game.min.js"
                 languagein="ECMASCRIPT5"
-                sourceMapOutputFile="/Users/travis/build/niku/KawazCatchJs/runtime/html5/sourcemap" sourceMapFormat="V3"
+                sourceMapOutputFile="/Users/travis/build/niku/KawazCatchJs/simulator/html5/sourcemap" sourceMapFormat="V3"
                 >
             <sources dir="/Users/travis/build/niku/KawazCatchJs/frameworks/cocos2d-html5">
                 <file name="CCBoot.js"/>
