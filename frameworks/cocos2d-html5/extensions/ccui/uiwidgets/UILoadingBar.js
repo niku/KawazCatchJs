@@ -124,7 +124,8 @@ ccui.LoadingBar = ccui.Widget.extend(/** @lends ccui.LoadingBar# */{
         var self = this;
         if(!barRenderer._textureLoaded){
             barRenderer.addEventListener("load", function(){
-                self.loadTexture(self._renderBarTexType, self._textureFile);
+                self.loadTexture(self._textureFile, self._renderBarTexType);
+                self._setPercent(self._percent);
             });
         }
 
@@ -236,23 +237,31 @@ ccui.LoadingBar = ccui.Widget.extend(/** @lends ccui.LoadingBar# */{
         if (percent === this._percent)
             return;
         this._percent = percent;
+        this._setPercent(percent);
+    },
+
+    _setPercent: function(){
+        var res, rect, spriteRenderer, spriteTextureRect;
+
         if (this._totalLength <= 0)
             return;
-        var res = this._percent / 100.0;
+        res = this._percent / 100.0;
 
         if (this._scale9Enabled)
             this._setScale9Scale();
         else {
-            var spriteRenderer = this._barRenderer;
-            var rect = spriteRenderer.getTextureRect();
-            rect.width = this._barRendererTextureSize.width * res;
-            this._barRenderer.setTextureRect(
+            spriteRenderer = this._barRenderer;
+            spriteTextureRect = this._barRendererTextureSize;
+            rect = spriteRenderer.getTextureRect();
+            rect.width = spriteTextureRect.width * res;
+            spriteRenderer.setTextureRect(
                 cc.rect(
                     rect.x,
                     rect.y,
-                    this._barRendererTextureSize.width * res,
-                    this._barRendererTextureSize.height
-                )
+                    spriteTextureRect.width * res,
+                    spriteTextureRect.height
+                ),
+                spriteRenderer._rectRotated
             );
         }
     },

@@ -784,7 +784,6 @@ cc.loader = /** @lends cc.loader# */{
             this.removeEventListener('load', loadCallback, false);
             this.removeEventListener('error', errorCallback, false);
 
-            cc.loader.cache[url] = img;
             if (callback)
                 callback(null, img);
         };
@@ -838,8 +837,13 @@ cc.loader = /** @lends cc.loader# */{
             cc.error("loader for [" + type + "] not exists!");
             return cb();
         }
-        var basePath = loader.getBasePath ? loader.getBasePath() : self.resPath;
-        var realUrl = self.getUrl(basePath, url);
+        var realUrl = url;
+        if (!cc._urlRegExp.test(url))
+        {
+            var basePath = loader.getBasePath ? loader.getBasePath() : self.resPath;
+            realUrl = self.getUrl(basePath, url);
+        }
+
         if(cc.game.config["noCache"] && typeof realUrl === "string"){
             if(self._noCacheRex.test(realUrl))
                 realUrl += "&_t=" + (new Date() - 0);
@@ -1404,23 +1408,7 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.UNKNOWN = 0;
-    /**
-     * @memberof cc.sys
-     * @name IOS
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.IOS = 1;
-    /**
-     * @memberof cc.sys
-     * @name ANDROID
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.ANDROID = 2;
+    sys.UNKNOWN = -1;
     /**
      * @memberof cc.sys
      * @name WIN32
@@ -1428,15 +1416,7 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.WIN32 = 3;
-    /**
-     * @memberof cc.sys
-     * @name MARMALADE
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.MARMALADE = 4;
+    sys.WIN32 = 0;
     /**
      * @memberof cc.sys
      * @name LINUX
@@ -1444,23 +1424,7 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.LINUX = 5;
-    /**
-     * @memberof cc.sys
-     * @name BADA
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.BADA = 6;
-    /**
-     * @memberof cc.sys
-     * @name BLACKBERRY
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.BLACKBERRY = 7;
+    sys.LINUX = 1;
     /**
      * @memberof cc.sys
      * @name MACOS
@@ -1468,7 +1432,39 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.MACOS = 8;
+    sys.MACOS = 2;
+    /**
+     * @memberof cc.sys
+     * @name ANDROID
+     * @constant
+     * @default
+     * @type {Number}
+     */
+    sys.ANDROID = 3;
+    /**
+     * @memberof cc.sys
+     * @name IOS
+     * @constant
+     * @default
+     * @type {Number}
+     */
+    sys.IPHONE = 4;
+    /**
+     * @memberof cc.sys
+     * @name IOS
+     * @constant
+     * @default
+     * @type {Number}
+     */
+    sys.IPAD = 5;
+    /**
+     * @memberof cc.sys
+     * @name BLACKBERRY
+     * @constant
+     * @default
+     * @type {Number}
+     */
+    sys.BLACKBERRY = 6;
     /**
      * @memberof cc.sys
      * @name NACL
@@ -1476,7 +1472,7 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.NACL = 9;
+    sys.NACL = 7;
     /**
      * @memberof cc.sys
      * @name EMSCRIPTEN
@@ -1484,7 +1480,7 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.EMSCRIPTEN = 10;
+    sys.EMSCRIPTEN = 8;
     /**
      * @memberof cc.sys
      * @name TIZEN
@@ -1492,23 +1488,7 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.TIZEN = 11;
-    /**
-     * @memberof cc.sys
-     * @name QT5
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.QT5 = 12;
-    /**
-     * @memberof cc.sys
-     * @name WP8
-     * @constant
-     * @default
-     * @type {Number}
-     */
-    sys.WP8 = 13;
+    sys.TIZEN = 9;
     /**
      * @memberof cc.sys
      * @name WINRT
@@ -1516,7 +1496,15 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @default
      * @type {Number}
      */
-    sys.WINRT = 14;
+    sys.WINRT = 10;
+    /**
+     * @memberof cc.sys
+     * @name WP8
+     * @constant
+     * @default
+     * @type {Number}
+     */
+    sys.WP8 = 11;
     /**
      * @memberof cc.sys
      * @name MOBILE_BROWSER
@@ -1562,13 +1550,6 @@ cc._initSys = function (config, CONFIG_KEY) {
      * @type {Boolean}
      */
     sys.isNative = false;
-
-    var browserSupportWebGL = [sys.BROWSER_TYPE_BAIDU, sys.BROWSER_TYPE_OPERA, sys.BROWSER_TYPE_FIREFOX, sys.BROWSER_TYPE_CHROME, sys.BROWSER_TYPE_SAFARI];
-    var osSupportWebGL = [sys.OS_IOS, sys.OS_WINDOWS, sys.OS_OSX, sys.OS_LINUX];
-    var multipleAudioWhiteList = [
-        sys.BROWSER_TYPE_BAIDU, sys.BROWSER_TYPE_OPERA, sys.BROWSER_TYPE_FIREFOX, sys.BROWSER_TYPE_CHROME, sys.BROWSER_TYPE_BAIDU_APP,
-        sys.BROWSER_TYPE_SAFARI, sys.BROWSER_TYPE_UC, sys.BROWSER_TYPE_QQ, sys.BROWSER_TYPE_MOBILE_QQ, sys.BROWSER_TYPE_IE
-    ];
 
     var win = window, nav = win.navigator, doc = document, docEle = doc.documentElement;
     var ua = nav.userAgent.toLowerCase();
@@ -1642,21 +1623,44 @@ cc._initSys = function (config, CONFIG_KEY) {
      */
     sys.os = osName;
 
+    var multipleAudioWhiteList = [
+        sys.BROWSER_TYPE_BAIDU, sys.BROWSER_TYPE_OPERA, sys.BROWSER_TYPE_FIREFOX, sys.BROWSER_TYPE_CHROME, sys.BROWSER_TYPE_BAIDU_APP,
+        sys.BROWSER_TYPE_SAFARI, sys.BROWSER_TYPE_UC, sys.BROWSER_TYPE_QQ, sys.BROWSER_TYPE_MOBILE_QQ, sys.BROWSER_TYPE_IE
+    ];
+
     sys._supportMultipleAudio = multipleAudioWhiteList.indexOf(sys.browserType) > -1;
 
 
     //++++++++++++++++++something about cc._renderTYpe and cc._supportRender begin++++++++++++++++++++++++++++
-    var userRenderMode = parseInt(config[CONFIG_KEY.renderMode]);
-    var renderType = cc._RENDER_TYPE_WEBGL;
-    var tempCanvas = cc.newElement("Canvas");
-    cc._supportRender = true;
-    var notSupportGL = true;
-    if(iOS)
-        notSupportGL = !window.WebGLRenderingContext || osSupportWebGL.indexOf(sys.os) === -1;
-    else
-        notSupportGL = !window.WebGLRenderingContext || browserSupportWebGL.indexOf(sys.browserType) === -1 || osSupportWebGL.indexOf(sys.os) === -1;
-    if (userRenderMode === 1 || (userRenderMode === 0 && notSupportGL) || (location.origin === "file://"))
-        renderType = cc._RENDER_TYPE_CANVAS;
+
+    (function(sys, config){
+        var userRenderMode = config[CONFIG_KEY.renderMode] - 0;
+        if(isNaN(userRenderMode) || userRenderMode > 2 || userRenderMode < 0)
+            userRenderMode = 0;
+        var shieldOs = [sys.OS_ANDROID];
+        var shieldBrowser = [];
+        var tmpCanvas = cc.newElement("canvas");
+        cc._renderType = cc._RENDER_TYPE_CANVAS;
+        cc._supportRender = false;
+
+        var supportWebGL = win.WebGLRenderingContext;
+
+        if(userRenderMode === 2 || (userRenderMode === 0 && supportWebGL && shieldOs.indexOf(sys.os) === -1 && shieldBrowser.indexOf(sys.browserType) === -1))
+            try{
+                var context = cc.create3DContext(tmpCanvas, {'stencil': true, 'preserveDrawingBuffer': true });
+                if(context){
+                    cc._renderType = cc._RENDER_TYPE_WEBGL;
+                    cc._supportRender = true;
+                }
+            }catch(e){}
+
+        if(userRenderMode === 1 || (userRenderMode === 0 && cc._supportRender === false))
+            try {
+                tmpCanvas.getContext("2d");
+                cc._renderType = cc._RENDER_TYPE_CANVAS;
+                cc._supportRender = true;
+            } catch (e) {}
+    })(sys, config);
 
     sys._canUseCanvasNewBlendModes = function(){
         var canvas = document.createElement('canvas');
@@ -1682,22 +1686,6 @@ cc._initSys = function (config, CONFIG_KEY) {
     //Whether or not the Canvas BlendModes are supported.
     sys._supportCanvasNewBlendModes = sys._canUseCanvasNewBlendModes();
 
-    if (renderType === cc._RENDER_TYPE_WEBGL) {
-        if (!win.WebGLRenderingContext
-            || !cc.create3DContext(tempCanvas, {'stencil': true, 'preserveDrawingBuffer': true })) {
-            if (userRenderMode === 0) renderType = cc._RENDER_TYPE_CANVAS;
-            else cc._supportRender = false;
-        }
-    }
-
-    if (renderType === cc._RENDER_TYPE_CANVAS) {
-        try {
-            tempCanvas.getContext("2d");
-        } catch (e) {
-            cc._supportRender = false;
-        }
-    }
-    cc._renderType = renderType;
     //++++++++++++++++++something about cc._renderType and cc._supportRender end++++++++++++++++++++++++++++++
 
     // check if browser supports Web Audio
@@ -1720,10 +1708,14 @@ cc._initSys = function (config, CONFIG_KEY) {
         localStorage.removeItem("storage");
         localStorage = null;
     } catch (e) {
-        if (e.name === "SECURITY_ERR" || e.name === "QuotaExceededError") {
+        var warn = function () {
             cc.warn("Warning: localStorage isn't enabled. Please confirm browser cookie or privacy option");
         }
-        sys.localStorage = function () {
+        sys.localStorage = {
+            getItem : warn,
+            setItem : warn,
+            removeItem : warn,
+            clear : warn
         };
     }
 
@@ -1778,6 +1770,21 @@ cc._initSys = function (config, CONFIG_KEY) {
      */
     sys.cleanScript = function (jsfile) {
         // N/A in cocos2d-html5
+    };
+
+    /**
+     * Check whether an object is valid,
+     * In web engine, it will return true if the object exist
+     * In native engine, it will return true if the JS object and the correspond native object are both valid
+     * @memberof cc.sys
+     * @name isObjectValid
+     * @param {Object} obj
+     * @return {boolean} Validity of the object
+     * @function
+     */
+    sys.isObjectValid = function (obj) {
+        if (obj) return true;
+        else return false;
     };
 
     /**
@@ -2034,6 +2041,7 @@ cc.game = /** @lends cc.game# */{
 
     EVENT_HIDE: "game_on_hide",
     EVENT_SHOW: "game_on_show",
+    EVENT_RESIZE: "game_on_resize",
     _eventHide: null,
     _eventShow: null,
     _onBeforeStartArr: [],
@@ -2336,3 +2344,35 @@ Function.prototype.bind = Function.prototype.bind || function (oThis) {
 
     return fBound;
 };
+
+cc._urlRegExp = new RegExp(
+    "^" +
+        // protocol identifier
+        "(?:(?:https?|ftp)://)" +
+        // user:pass authentication
+        "(?:\\S+(?::\\S*)?@)?" +
+        "(?:" +
+            // IP address dotted notation octets
+            // excludes loopback network 0.0.0.0
+            // excludes reserved space >= 224.0.0.0
+            // excludes network & broacast addresses
+            // (first & last IP address of each class)
+            "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
+            "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
+            "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
+        "|" +
+            // host name
+            "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)" +
+            // domain name
+            "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
+            // TLD identifier
+            "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))" +
+        "|" +
+            "(?:localhost)" +
+        ")" +
+        // port number
+        "(?::\\d{2,5})?" +
+        // resource path
+        "(?:/\\S*)?" +
+    "$", "i"
+);

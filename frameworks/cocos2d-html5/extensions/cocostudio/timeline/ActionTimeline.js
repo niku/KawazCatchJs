@@ -60,6 +60,38 @@ ccs.ActionTimelineData = ccs.Class.extend({
 
 });
 
+ccs.ObjectExtensionData = ccs.Class.extend({
+
+    _customProperty: null,
+    _timelineData: null,
+
+    ctor: function(){
+        this._timelineData = new ccs.ActionTimelineData(0);
+        return true;
+    },
+
+    setActionTag: function(actionTag){
+        this._timelineData.setActionTag(actionTag);
+    },
+
+    getActionTag: function(){
+        return this._timelineData.getActionTag();
+    },
+
+    setCustomProperty: function(customProperty){
+        this._customProperty = customProperty;
+    },
+
+    getCustomProperty: function(){
+        return this._customProperty;
+    }
+
+});
+
+ccs.ObjectExtensionData.create = function(){
+    return new ccs.ObjectExtensionData();
+};
+
 /**
  * Create new ActionTimelineData.
  *
@@ -98,6 +130,7 @@ ccs.ActionTimeline = cc.Action.extend({
     _loop: null,
     _frameEventListener: null,
     _animationInfos: null,
+    _lastFrameListener: null,
 
     ctor: function(){
         cc.Action.prototype.ctor.call(this);
@@ -255,7 +288,7 @@ ccs.ActionTimeline = cc.Action.extend({
      * Set current frame index, this will cause action plays to this frame.
      */
     setCurrentFrame: function(frameIndex){
-        if (frameIndex >= this._startFrame && frameIndex >= this._endFrame){
+        if (frameIndex >= this._startFrame && frameIndex <= this._endFrame){
             this._currentFrame = frameIndex;
             this._time = this._currentFrame * this._frameInternal;
         }else{
@@ -376,15 +409,24 @@ ccs.ActionTimeline = cc.Action.extend({
         }
 
         this._time += delta * this._timeSpeed;
-        this._currentFrame = this._time / this._frameInternal | 0;
+        var endoffset = this._time - this._endFrame * this._frameInternal;
 
-        this._stepToFrame(this._currentFrame);
-
-        if(this._time > this._endFrame * this._frameInternal){
+        if(endoffset < this._frameInternal){
+            this._currentFrame = this._time / this._frameInternal;
+            this._stepToFrame(this._currentFrame);
+            if(endoffset >= 0 && this._lastFrameListener)
+                this._lastFrameListener();
+        }else{
             this._playing = this._loop;
-            if(!this._playing)
+            if(!this._playing){
                 this._time = this._endFrame * this._frameInternal;
-            else
+                if (this._currentFrame != this._endFrame){
+                    this._currentFrame = this._endFrame;
+                    this._stepToFrame(this._currentFrame);
+                    if(this._lastFrameListener)
+                        this._lastFrameListener();
+                }
+            }else
                 this.gotoFrameAndPlay(this._startFrame, this._endFrame, this._loop);
         }
 
@@ -461,6 +503,22 @@ ccs.ActionTimeline = cc.Action.extend({
      */
     removeAnimationInfo: function(name){
         delete this._animationInfos[name];
+    },
+
+    isAnimationInfoExists: function(name){
+        return this._animationInfos[name];
+    },
+
+    getAnimationInfo: function(name){
+        return this._animationInfos[name];
+    },
+
+    setLastFrameCallFunc: function(listener){
+        this._lastFrameListener = listener;
+    },
+
+    clearLastFrameCallFunc: function(){
+        this._lastFrameListener = null;
     }
 });
 

@@ -656,7 +656,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
             locPosition.x = newPosOrxValue.x;
             locPosition.y = newPosOrxValue.y;
         } else {
-            if(locPosition.x === newPosOrxValue.x && locPosition.y === yValue)
+            if(locPosition.x === newPosOrxValue && locPosition.y === yValue)
                 return;
             locPosition.x = newPosOrxValue;
             locPosition.y = yValue;
@@ -1304,7 +1304,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     removeFromParent: function (cleanup) {
         if (this._parent) {
-            if (cleanup == null)
+            if (cleanup === undefined)
                 cleanup = true;
             this._parent.removeChild(this, cleanup);
         }
@@ -1335,7 +1335,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         if (this._children.length === 0)
             return;
 
-        if (cleanup == null)
+        if (cleanup === undefined)
             cleanup = true;
         if (this._children.indexOf(child) > -1)
             this._detachChild(child, cleanup);
@@ -1357,7 +1357,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
             cc.log(cc._LogInfos.Node_removeChildByTag);
 
         var child = this.getChildByTag(tag);
-        if (child == null)
+        if (!child)
             cc.log(cc._LogInfos.Node_removeChildByTag_2, tag);
         else
             this.removeChild(child, cleanup);
@@ -1381,25 +1381,27 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         // not using detachChild improves speed here
         var __children = this._children;
         if (__children !== null) {
-            if (cleanup == null)
+            if (cleanup === undefined)
                 cleanup = true;
             for (var i = 0; i < __children.length; i++) {
                 var node = __children[i];
                 if (node) {
-                    // IMPORTANT:
-                    //  -1st do onExit
-                    //  -2nd cleanup
                     if (this._running) {
                         node.onExitTransitionDidStart();
                         node.onExit();
                     }
+
+                    // If you don't do cleanup, the node's actions will not get removed and the
                     if (cleanup)
                         node.cleanup();
+
                     // set parent nil at the end
                     node.parent = null;
+                    node._renderCmd.detachFromParent();
                 }
             }
             this._children.length = 0;
+            cc.renderer.childrenOrderDirty = true;
         }
     },
 
@@ -1869,7 +1871,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * spriteB.setAdditionalTransform(t);
      */
     setAdditionalTransform: function (additionalTransform) {
-        if(additionalTransform == null)
+        if(additionalTransform === undefined)
             return this._additionalTransformDirty = false;
         this._additionalTransform = additionalTransform;
         this._renderCmd.setDirtyFlag(cc.Node._dirtyFlags.transformDirty);
@@ -2255,7 +2257,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
     _getBoundingBoxToCurrentNode: function (parentTransform) {
         var rect = cc.rect(0, 0, this._contentSize.width, this._contentSize.height);
-        var trans = (parentTransform == null) ? this.getNodeToParentTransform() : cc.affineTransformConcat(this.getNodeToParentTransform(), parentTransform);
+        var trans = (parentTransform === undefined) ? this.getNodeToParentTransform() : cc.affineTransformConcat(this.getNodeToParentTransform(), parentTransform);
         rect = cc.rectApplyAffineTransform(rect, trans);
 
         //query child's BoundingBox
@@ -2426,6 +2428,119 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
             return new cc.Node.CanvasRenderCmd(this);
         else
             return new cc.Node.WebGLRenderCmd(this);
+    },
+
+    /** Search the children of the receiving node to perform processing for nodes which share a name.
+     *
+     * @param name The name to search for, supports c++11 regular expression.
+     * Search syntax options:
+     * `//`: Can only be placed at the begin of the search string. This indicates that it will search recursively.
+     * `..`: The search should move up to the node's parent. Can only be placed at the end of string.
+     * `/` : When placed anywhere but the start of the search string, this indicates that the search should move to the node's children.
+     *
+     * @code
+     * enumerateChildren("//MyName", ...): This searches the children recursively and matches any node with the name `MyName`.
+     * enumerateChildren("[[:alnum:]]+", ...): This search string matches every node of its children.
+     * enumerateChildren("A[[:digit:]]", ...): This searches the node's children and returns any child named `A0`, `A1`, ..., `A9`.
+     * enumerateChildren("Abby/Normal", ...): This searches the node's grandchildren and returns any node whose name is `Normal`
+     * and whose parent is named `Abby`.
+     * enumerateChildren("//Abby/Normal", ...): This searches recursively and returns any node whose name is `Normal` and whose
+     * parent is named `Abby`.
+     * @endcode
+     *
+     * @warning Only support alpha or number for name, and not support unicode.
+     *
+     * @param callback A callback function to execute on nodes that match the `name` parameter. The function takes the following arguments:
+     *  `node`
+     *      A node that matches the name
+     *  And returns a boolean result. Your callback can return `true` to terminate the enumeration.
+     *
+     */
+    enumerateChildren: function(name, callback){
+        cc.assert(name && name.length != 0, "Invalid name");
+        cc.assert(callback != null, "Invalid callback function");
+
+        var length = name.length;
+        var subStrStartPos = 0;
+        var subStrlength = length;
+
+        // Starts with '//'?
+        var searchRecursively = false;
+        if(length > 2 && name[0] === "/" && name[1] === "/"){
+            searchRecursively = true;
+            subStrStartPos = 2;
+            subStrlength -= 2;
+        }
+
+        var searchFromParent = false;
+        if(length > 3 && name[length-3] === "/" && name[length-2] === "." && name[length-1] === "."){
+            searchFromParent = true;
+            subStrlength -= 3;
+        }
+
+        var newName = name.substr(subStrStartPos, subStrlength);
+
+        if(searchFromParent)
+            newName = "[[:alnum:]]+/" + newName;
+
+        if(searchRecursively)
+            this.doEnumerateRecursive(this, newName, callback);
+        else
+            this.doEnumerate(newName, callback);
+    },
+
+    doEnumerateRecursive: function(node, name, callback){
+        var ret = false;
+        if(node.doEnumerate(name,callback)){
+            ret = true;
+        }else{
+            var child,
+                children = node.getChildren(),
+                length = children.length;
+            // search its children
+            for (var i=0; i<length; i++) {
+                child = children[i];
+                if (this.doEnumerateRecursive(child, name, callback)) {
+                    ret = true;
+                    break;
+                }
+            }
+        }
+    },
+
+    doEnumerate: function(name, callback){
+        // name may be xxx/yyy, should find its parent
+        var pos = name.indexOf('/');
+        var searchName = name;
+        var needRecursive = false;
+        if (pos !== -1){
+            searchName = name.substr(0, pos);
+            //name.erase(0, pos+1);
+            needRecursive = true;
+        }
+
+        var ret = false;
+        var child,
+            children = this._children,
+            length = children.length;
+        for (var i=0; i<length; i++){
+            child = children[i];
+            if (child._name.indexOf(searchName) !== -1){
+                if (!needRecursive){
+                    // terminate enumeration if callback return true
+                    if (callback(child)){
+                        ret = true;
+                        break;
+                    }
+                }else{
+                    ret = child.doEnumerate(name, callback);
+                    if (ret)
+                        break;
+                }
+            }
+        }
+
+        return ret;
     }
 });
 

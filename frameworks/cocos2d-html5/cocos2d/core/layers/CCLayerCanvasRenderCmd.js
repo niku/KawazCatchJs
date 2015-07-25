@@ -122,6 +122,7 @@
 
         this._syncStatus(parentCmd);
         cc.renderer.pushRenderCommand(this);
+        this._cacheDirty = true;
 
         //the bakeSprite is drawing
         this._bakeSprite.visit(this);
@@ -223,6 +224,7 @@
             var bakeContext = locBakeSprite.getCacheContext();
             var ctx = bakeContext.getContext();
             locBakeSprite.resetCanvasSize(boundingBox.width, boundingBox.height);
+            ctx.fillStyle = bakeContext._currentFillStyle;
 
             bakeContext.setOffset(0 - boundingBox.x, ctx.canvas.height - boundingBox.height + boundingBox.y );
             locBakeSprite.setPosition(boundingBox.x, boundingBox.y);

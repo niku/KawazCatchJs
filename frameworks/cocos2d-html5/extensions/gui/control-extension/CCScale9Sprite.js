@@ -462,11 +462,11 @@ cc.Scale9Sprite = cc.Node.extend(/** @lends cc.Scale9Sprite# */{
         if(!locLoaded){
             texture.addEventListener("load", function(sender){
                 // the texture is rotated on Canvas render mode, so isRotated always is false.
-                var preferredSize = this._preferredSize, restorePreferredSize = (preferredSize.width !== 0 || preferredSize.height !== 0);
-                if(restorePreferredSize)preferredSize = cc.size(preferredSize.width, preferredSize.height);
+                var preferredSize = this._preferredSize, restorePreferredSize = preferredSize.width !== 0 && preferredSize.height !== 0;
+                if (restorePreferredSize) preferredSize = cc.size(preferredSize.width, preferredSize.height);
                 var size  = sender.getContentSize();
                 this.updateWithBatchNode(this._scale9Image, cc.rect(0,0,size.width,size.height), false, this._capInsets);
-                if(restorePreferredSize)this.setPreferredSize(preferredSize);
+                if (restorePreferredSize)this.setPreferredSize(preferredSize);
                 this._positionsAreDirty = true;
                 this.dispatchEvent("load");
             }, this);
@@ -495,10 +495,10 @@ cc.Scale9Sprite = cc.Node.extend(/** @lends cc.Scale9Sprite# */{
         if(!locLoaded){
             spriteFrame.addEventListener("load", function(sender){
                 // the texture is rotated on Canvas render mode, so isRotated always is false.
-                var preferredSize = this._preferredSize, restorePreferredSize = (preferredSize.width !== 0 || preferredSize.height !== 0);
-                if(restorePreferredSize)preferredSize = cc.size(preferredSize.width, preferredSize.height);
+                var preferredSize = this._preferredSize, restorePreferredSize = preferredSize.width !== 0 && preferredSize.height !== 0;
+                if (restorePreferredSize) preferredSize = cc.size(preferredSize.width, preferredSize.height);
                 this.updateWithBatchNode(this._scale9Image, sender.getRect(), cc._renderType === cc._RENDER_TYPE_WEBGL && sender.isRotated(), this._capInsets);
-                if(restorePreferredSize)this.setPreferredSize(preferredSize);
+                if (restorePreferredSize)this.setPreferredSize(preferredSize);
                 this._positionsAreDirty = true;
                 this.dispatchEvent("load");
             },this);
@@ -596,6 +596,14 @@ cc.Scale9Sprite = cc.Node.extend(/** @lends cc.Scale9Sprite# */{
         var tmpTexture = batchNode.getTexture();
         var locLoaded = tmpTexture.isLoaded();
         this._textureLoaded = locLoaded;
+
+        //this._capInsets = capInsets;
+        var locCapInsets = this._capInsets;
+        locCapInsets.x = capInsets.x;
+        locCapInsets.y = capInsets.y;
+        locCapInsets.width = capInsets.width;
+        locCapInsets.height = capInsets.height;
+
         if(!locLoaded){
             tmpTexture.addEventListener("load", function(sender){
                 this._positionsAreDirty = true;
@@ -606,12 +614,6 @@ cc.Scale9Sprite = cc.Node.extend(/** @lends cc.Scale9Sprite# */{
         var locScale9Image = this._scale9Image;
         locScale9Image.removeAllChildren(true);
 
-        //this._capInsets = capInsets;
-        var locCapInsets = this._capInsets;
-        locCapInsets.x = capInsets.x;
-        locCapInsets.y = capInsets.y;
-        locCapInsets.width = capInsets.width;
-        locCapInsets.height = capInsets.height;
         this._spriteFrameRotated = rotated;
 
         var selTexture = locScale9Image.getTexture();
@@ -895,10 +897,10 @@ cc.Scale9Sprite = cc.Node.extend(/** @lends cc.Scale9Sprite# */{
         if(!locLoaded){
             spriteFrame.addEventListener("load", function(sender){
                 // the texture is rotated on Canvas render mode, so isRotated always is false.
-                var preferredSize = this._preferredSize, restorePreferredSize = (preferredSize.width !== 0 || preferredSize.height !== 0);
-                if(restorePreferredSize)preferredSize = cc.size(preferredSize.width, preferredSize.height);
+                var preferredSize = this._preferredSize, restorePreferredSize = preferredSize.width !== 0 && preferredSize.height !== 0;
+                if (restorePreferredSize) preferredSize = cc.size(preferredSize.width, preferredSize.height);
                 this.updateWithBatchNode(this._scale9Image, sender.getRect(), cc._renderType === cc._RENDER_TYPE_WEBGL && sender.isRotated(), this._capInsets);
-                if(restorePreferredSize)this.setPreferredSize(preferredSize);
+                if (restorePreferredSize)this.setPreferredSize(preferredSize);
                 this._positionsAreDirty = true;
                 this.dispatchEvent("load");
             },this);

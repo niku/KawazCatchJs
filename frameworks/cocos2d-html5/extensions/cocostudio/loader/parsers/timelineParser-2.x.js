@@ -111,10 +111,18 @@
 
         node.setTag(json["Tag"] || 0);
 
-        node.setUserObject(new ccs.ActionTimelineData(json["ActionTag"] || 0));
+        var actionTag = json["ActionTag"] || 0;
+        var extensionData = new ccs.ObjectExtensionData();
+        var customProperty = json["UserData"];
+        if(customProperty !== undefined)
+            extensionData.setCustomProperty(customProperty);
+        extensionData.setActionTag(actionTag);
+        node.setUserObject(extensionData);
 
         node.setCascadeColorEnabled(true);
         node.setCascadeOpacityEnabled(true);
+
+        setLayoutComponent(node, json);
     };
 
     parser.parseChild = function(node, children, resourcePath){
@@ -153,6 +161,9 @@
         var node = new cc.Node();
 
         this.generalAttributes(node, json);
+        var color = json["CColor"];
+        if(color != null)
+            node.setColor(getColor(color));
 
         return node;
     };
@@ -171,9 +182,20 @@
                 node.setTexture(path);
             else if(type === 1){
                 var spriteFrame = cc.spriteFrameCache.getSpriteFrame(path);
-                node.setSpriteFrame(spriteFrame);
+                if(spriteFrame)
+                    node.setSpriteFrame(spriteFrame);
             }
         });
+
+        var blendData = json["BlendFunc"];
+        if(json["BlendFunc"]) {
+            var blendFunc = cc.BlendFunc.ALPHA_PREMULTIPLIED;
+            if (blendData["Src"] !== undefined)
+                blendFunc.src = blendData["Src"];
+            if (blendData["Dst"] !== undefined)
+                blendFunc.dst = blendData["Dst"];
+            node.setBlendFunc(blendFunc);
+        }
 
         if(json["FlipX"])
             node.setFlippedX(true);
@@ -202,7 +224,18 @@
                 cc.log("%s need to be preloaded", path);
             node = new cc.ParticleSystem(path);
             self.generalAttributes(node, json);
+            node.setPositionType(cc.ParticleSystem.TYPE_GROUPED);
             !cc.sys.isNative && node.setDrawMode(cc.ParticleSystem.TEXTURE_MODE);
+
+            var blendData = json["BlendFunc"];
+            if(json["BlendFunc"]){
+                var blendFunc = cc.BlendFunc.ALPHA_PREMULTIPLIED;
+                if(blendData["Src"] !== undefined)
+                    blendFunc.src = blendData["Src"];
+                if(blendData["Dst"] !== undefined)
+                    blendFunc.dst = blendData["Dst"];
+                node.setBlendFunc(blendFunc);
+            }
         });
         return node;
     };
@@ -212,14 +245,14 @@
     // WIDGET //
     ////////////
 
-    parser.widgetAttributes = function (widget, json) {
+    parser.widgetAttributes = function (widget, json, enableContent) {
         widget.setCascadeColorEnabled(true);
         widget.setCascadeOpacityEnabled(true);
 
         widget.setUnifySizeEnabled(false);
         //widget.setLayoutComponentEnabled(true);
         widget.ignoreContentAdaptWithSize(false);
-        setContentSize(widget, json["Size"]);
+        !enableContent && setContentSize(widget, json["Size"]);
 
         var name = json["Name"];
         if (name)
@@ -227,7 +260,12 @@
 
         var actionTag = json["ActionTag"] || 0;
         widget.setActionTag(actionTag);
-        widget.setUserObject(new ccs.ActionTimelineData(actionTag));
+        var extensionData = new ccs.ObjectExtensionData();
+        var customProperty = json["UserData"];
+        if(customProperty !== undefined)
+            extensionData.setCustomProperty(customProperty);
+        extensionData.setActionTag(actionTag);
+        widget.setUserObject(extensionData);
 
         var rotationSkewX = json["RotationSkewX"];
         if (rotationSkewX)
@@ -295,12 +333,17 @@
         if (color != null)
             widget.setColor(getColor(color));
 
+        setLayoutComponent(widget, json);
+    };
+
+    var setLayoutComponent = function(widget, json){
+
         var layoutComponent = ccui.LayoutComponent.bindLayoutComponent(widget);
         if(!layoutComponent)
             return;
 
-        var positionXPercentEnabled = json["PositionPercentXEnable"] || false;
-        var positionYPercentEnabled = json["PositionPercentYEnable"] || false;
+        var positionXPercentEnabled = json["PositionPercentXEnable"] || json["PositionPercentXEnabled"] || false;
+        var positionYPercentEnabled = json["PositionPercentYEnable"] || json["PositionPercentYEnabled"] || false;
         var positionXPercent = 0,
             positionYPercent = 0,
             PrePosition = json["PrePosition"];
@@ -308,8 +351,8 @@
             positionXPercent = PrePosition["X"] || 0;
             positionYPercent = PrePosition["Y"] || 0;
         }
-        var sizeXPercentEnable = json["PercentWidthEnable"] || false;
-        var sizeYPercentEnable = json["PercentHeightEnable"] || false;
+        var sizeXPercentEnable = json["PercentWidthEnable"] || json["PercentWidthEnabled"]  || false;
+        var sizeYPercentEnable = json["PercentHeightEnable"]|| json["PercentHeightEnabled"]  || false;
         var sizeXPercent = 0,
             sizeYPercent = 0,
             PreSize = json["PreSize"];
@@ -334,6 +377,7 @@
         layoutComponent.setPercentHeightEnabled(sizeYPercentEnable);
         layoutComponent.setPercentWidth(sizeXPercent);
         layoutComponent.setPercentHeight(sizeYPercent);
+        layoutComponent.setPercentWidthEnabled(sizeXPercentEnable || sizeYPercentEnable);
         layoutComponent.setStretchWidthEnabled(stretchHorizontalEnabled);
         layoutComponent.setStretchHeightEnabled(stretchVerticalEnabled);
 
@@ -368,6 +412,23 @@
         layoutComponent.setBottomMargin(bottomMargin);
         layoutComponent.setLeftMargin(leftMargin);
         layoutComponent.setRightMargin(rightMargin);
+    };
+
+    var setLayoutBackground = function(layout, single, first, end){
+        if( layout.getBackGroundColorType() === 2 ){
+            first = first || {};
+            end = end || {};
+            layout.setBackGroundColor(getColor(first), getColor(end));
+        }else{
+            single = single || {};
+            layout.setBackGroundColor(getColor(single));
+        }
+    };
+
+    var setLayoutBackgroundVector = function(widget, vector){
+        var x = vector["ScaleX"] || 0;
+        var y = vector["ScaleY"] || 0;
+        widget.setBackGroundColorVector(cc.p(x, y));
     };
 
     /**
@@ -422,16 +483,8 @@
 
         }
 
-        var firstColor = json["FirstColor"];
-        var endColor = json["EndColor"];
-        if(endColor["R"] != null && endColor["G"] != null && endColor["B"] != null)
-            widget.setBackGroundColor(getColor(firstColor), getColor(endColor));
-        else
-            widget.setBackGroundColor(getColor(json["SingleColor"]));
-
-        var colorVector = json["ColorVector"];
-        if(colorVector != null)
-            widget.setBackGroundColorVector(cc.p(colorVector["ScaleX"], colorVector["ScaleY"]));
+        setLayoutBackground(widget, json["SingleColor"], json["FirstColor"], json["EndColor"]);
+        setLayoutBackgroundVector(widget, json["ColorVector"]);
 
         return widget;
     };
@@ -444,8 +497,6 @@
     parser.initText = function(json, resourcePath){
 
         var widget = new ccui.Text();
-
-        this.widgetAttributes(widget, json);
 
         var touchScaleEnabled = json["TouchScaleChangeAble"];
         if(touchScaleEnabled != null)
@@ -492,11 +543,6 @@
         }
         widget.setTextVerticalAlignment(v_alignment);
 
-        //todo check it
-        var isCustomSize = json["IsCustomSize"];
-        if(isCustomSize != null)
-            widget.ignoreContentAdaptWithSize(!isCustomSize);
-
         var fontResource = json["FontResource"];
         if(fontResource != null){
             var path = fontResource["Path"];
@@ -505,18 +551,34 @@
                 if (cc.sys.isNative) {
                     fontName = cc.path.join(cc.loader.resPath, resourcePath, path);
                 } else {
-                    fontName = path.match(/([^\/]+)\.ttf/);
+                    fontName = path.match(/([^\/]+)\.(\S+)/);
                     fontName = fontName ? fontName[1] : "";
                 }
                 widget.setFontName(fontName);
             }
         }
 
+        if(json["OutlineEnabled"] && json["OutlineColor"] && widget.enableOutline)
+            widget.enableOutline(getColor(json["OutlineColor"]), getParam(json["OutlineSize"], 1));
+
+        if(json["ShadowEnabled"] && json["ShadowColor"] && widget.enableShadow)
+            widget.enableShadow(
+                getColor(json["ShadowColor"]),
+                cc.size(getParam(json["ShadowOffsetX"], 2), getParam(json["ShadowOffsetY"], -2)),
+                json["ShadowBlurRadius"] || 0
+            );
+
+        var isCustomSize = json["IsCustomSize"];
+        if(isCustomSize != null)
+            widget.ignoreContentAdaptWithSize(!isCustomSize);
+
         widget.setUnifySizeEnabled(false);
 
-        if(widget.isIgnoreContentAdaptWithSize())
-            setContentSize(widget, json["Size"]);
-
+        var color = json["CColor"];
+        json["CColor"] = null;
+        widget.setTextColor(getColor(color));
+        this.widgetAttributes(widget, json, widget.isIgnoreContentAdaptWithSize());
+        json["CColor"] = color;
         return widget;
 
     };
@@ -573,12 +635,24 @@
                 if (cc.sys.isNative) {
                     fontName = cc.path.join(cc.loader.resPath, resourcePath, path);
                 } else {
-                    fontName = path.match(/([^\/]+)\.ttf/);
+                    fontName = path.match(/([^\/]+)\.(\S+)/);
                     fontName = fontName ? fontName[1] : "";
                 }
                 widget.setTitleFontName(fontName);
             }
         }
+
+        var label = widget.getTitleRenderer();
+        if(label && json["ShadowEnabled"] && json["ShadowColor"] && label.enableShadow){
+            label.enableShadow(
+                getColor(json["ShadowColor"]),
+                cc.size(getParam(json["ShadowOffsetX"], 2), getParam(json["ShadowOffsetY"], -2)),
+                json["ShadowBlurRadius"] || 0
+            );
+        }
+        if(label && json["OutlineEnabled"] && json["OutlineColor"] && label.enableStroke)
+            label.enableStroke(getColor(json["OutlineColor"]), getParam(json["OutlineSize"], 1));
+
         this.widgetAttributes(widget, json);
 
         if(scale9Enabled) {
@@ -676,24 +750,8 @@
             setContentSize(widget, json["Size"]);
         }
 
-        var firstColor = json["FirstColor"];
-        var endColor = json["EndColor"];
-        if(firstColor && endColor){
-            if(endColor["R"] != null && endColor["G"] != null && endColor["B"] != null)
-                widget.setBackGroundColor(getColor(firstColor), getColor(endColor));
-            else
-                widget.setBackGroundColor(getColor(firstColor));
-        }else{
-            widget.setBackGroundColor(getColor(json["SingleColor"]));
-        }
-
-
-        var colorVector = json["ColorVector"];
-        if(colorVector){
-            var colorVectorX = getParam(colorVector["ScaleX"], 1);
-            var colorVectorY = getParam(colorVector["ScaleY"], 1);
-            widget.setBackGroundColorVector(cc.p(colorVectorX, colorVectorY));
-        }
+        setLayoutBackground(widget, json["SingleColor"], json["FirstColor"], json["EndColor"]);
+        setLayoutBackgroundVector(widget, json["ColorVector"]);
 
         var innerNodeSize = json["InnerNodeSize"];
         var innerSize = cc.size(
@@ -855,21 +913,10 @@
         var colorType = getParam(json["ComboBoxIndex"], 0);
         widget.setBackGroundColorType(colorType);
 
-        var bgColorOpacity = json["BackColorAlpha"];
-        var firstColor = json["FirstColor"];
-        var endColor = json["EndColor"];
-        if(firstColor && endColor){
-            if(endColor["R"] != null && endColor["G"] != null && endColor["B"] != null)
-                widget.setBackGroundColor(getColor(firstColor), getColor(endColor));
-            else
-                widget.setBackGroundColor(getColor(firstColor));
-        }else{
-            widget.setBackGroundColor(getColor(json["SingleColor"]));
-        }
+        setLayoutBackground(widget, json["SingleColor"], json["FirstColor"], json["EndColor"]);
+        setLayoutBackgroundVector(widget, json["ColorVector"]);
 
-        var colorVector = json["ColorVector"];
-        if(colorVector != null && colorVector["ScaleX"] != null && colorVector["ScaleY"] != null)
-            widget.setBackGroundColorVector(cc.p(colorVector["ScaleX"], colorVector["ScaleY"]));
+        var bgColorOpacity = json["BackColorAlpha"];
         if(bgColorOpacity != null)
             widget.setBackGroundColorOpacity(bgColorOpacity);
 
@@ -951,20 +998,9 @@
         if(innerSize != null)
             widget.setInnerContainerSize(cc.size(innerSize["Widget"]||0, innerSize["Height"]||0));
 
-        var firstColor = json["FirstColor"];
-        var endColor = json["EndColor"];
-        if(firstColor && endColor){
-            if(endColor["R"] != null && endColor["G"] != null && endColor["B"] != null)
-                widget.setBackGroundColor(getColor(firstColor), getColor(endColor));
-            else
-                widget.setBackGroundColor(getColor(firstColor));
-        }else{
-            widget.setBackGroundColor(getColor(json["SingleColor"]));
-        }
+        setLayoutBackground(widget, json["SingleColor"], json["FirstColor"], json["EndColor"]);
+        setLayoutBackgroundVector(widget, json["ColorVector"]);
 
-        var colorVector = json["ColorVector"];
-        if(colorVector != null && colorVector["ScaleX"] != null && colorVector["ScaleY"] != null)
-            widget.setBackGroundColorVector(cc.p(colorVector["ScaleX"], colorVector["ScaleY"]));
         if(bgColorOpacity != null)
             widget.setBackGroundColorOpacity(bgColorOpacity);
 
@@ -1020,6 +1056,7 @@
                 cc.log("%s need to be pre loaded", path);
             widget.setFntFile(path);
         });
+        widget.ignoreContentAdaptWithSize(true);
         return widget;
     };
 
@@ -1073,7 +1110,7 @@
                 if (cc.sys.isNative) {
                     fontName = cc.path.join(cc.loader.resPath, resourcePath, path);
                 } else {
-                    fontName = path.match(/([^\/]+)\.ttf/);
+                    fontName = path.match(/([^\/]+)\.(\S+)/);
                     fontName = fontName ? fontName[1] : "";
                 }
                 widget.setFontName(fontName);
@@ -1109,13 +1146,10 @@
         var volume = json["Volume"] || 0;
         cc.audioEngine.setMusicVolume(volume);
         //var name = json["Name"];
-        var resPath = "";
-        if(cc.loader.resPath)
-            resPath = (cc.loader.resPath + "/").replace(/\/\/$/, "/");
 
         loadTexture(json["FileData"], resourcePath, function(path, type){
             cc.loader.load(path, function(){
-                cc.audioEngine.playMusic(resPath + path, loop);
+                cc.audioEngine.playMusic(path, loop);
             });
         });
 
@@ -1156,6 +1190,9 @@
                 parser.generalAttributes(obj.node, json);
                 if(obj.action && obj.node){
                     obj.action.tag = obj.node.tag;
+                    var InnerActionSpeed = json["InnerActionSpeed"];
+                    if(InnerActionSpeed !== undefined)
+                        obj.action.setTimeSpeed(InnerActionSpeed);
                     obj.node.runAction(obj.action);
                     obj.action.gotoFrameAndPause(0);
                 }
@@ -1189,8 +1226,6 @@
 
         var currentAnimationName = json["CurrentAnimationName"];
 
-        parser.generalAttributes(node, json);
-
         loadTexture(json["FileData"], resourcePath, function(path, type){
             var plists, pngs;
             var armJson = cc.loader.getRes(path);
@@ -1208,8 +1243,16 @@
             node.init(getFileName(path));
             if(isAutoPlay)
                 node.getAnimation().play(currentAnimationName, -1, isLoop);
+            else{
+                node.getAnimation().play(currentAnimationName);
+                node.getAnimation().gotoAndPause(0);
+            }
 
         });
+
+        parser.generalAttributes(node, json);
+
+        node.setColor(getColor(json["CColor"]));
         return node;
     };
 
@@ -1228,13 +1271,16 @@
                     loadedPlist[resourcePath + plist] = true;
                     cc.spriteFrameCache.addSpriteFrames(resourcePath + plist);
                 }else{
-                    if(!loadedPlist[resourcePath + plist])
+                    if(!loadedPlist[resourcePath + plist] && !cc.spriteFrameCache.getSpriteFrame(path))
                         cc.log("%s need to be preloaded", resourcePath + plist);
                 }
             }
-            if(type !== 0)
-                cb(path, type);
-            else
+            if(type !== 0){
+                if(cc.spriteFrameCache.getSpriteFrame(path))
+                    cb(path, type);
+                else
+                    cc.log("failed to get spriteFrame: %s", path);
+            }else
                 cb(resourcePath + path, type);
         }
     };
@@ -1244,7 +1290,8 @@
         var r = json["R"] != null ? json["R"] : 255;
         var g = json["G"] != null ? json["G"] : 255;
         var b = json["B"] != null ? json["B"] : 255;
-        return cc.color(r, g, b);
+        var a = json["A"] != null ? json["A"] : 255;
+        return cc.color(r, g, b, a);
     };
 
     var setContentSize = function(node, size){

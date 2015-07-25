@@ -140,8 +140,8 @@ ccs._parser = cc.Class.extend({
         return json["widgetTree"];
     },
 
-    parse: function(file, json){
-        var resourcePath = this._dirname(file);
+    parse: function(file, json, resourcePath){
+        resourcePath = resourcePath || this._dirname(file);
         this.pretreatment(json, resourcePath);
         var node = this.parseNode(this.getNodeJson(json), resourcePath, file);
         node && this.deferred(json, resourcePath, node, file);
@@ -221,3 +221,25 @@ ccs.csLoader = {
         return ccs._load(file);
     }
 };
+
+
+cc._jsonLoader = {
+    load : function(realUrl, url, res, cb){
+        cc.loader.loadJson(realUrl, function(error, data){
+            if(data && data["Content"] && data["Content"]["Content"]["UsedResources"]){
+                var list = data["Content"]["Content"]["UsedResources"],
+                    dirname = cc.path.dirname(realUrl);
+                for(var i=0; i<list.length; i++){
+                    list[i] = cc.path.join(dirname, list[i]);
+                }
+                cc.loader.load(list, function(error, result){
+                    cc.loader.loadJson(realUrl, cb);
+                });
+            }else{
+                cc.loader.loadJson(realUrl, cb);
+            }
+
+        });
+    }
+};
+cc.loader.register(["json", "ExportJson"], cc._jsonLoader);
