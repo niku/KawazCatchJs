@@ -8,7 +8,7 @@ env:
     - GIT_COMMITTER_EMAIL=niku@niku.name
     - GIT_AUTHOR_NAME=niku
     - GIT_AUTHOR_EMAIL=niku@niku.name
-    - secure: "MPYTp0QiIEM4pQwz9edmbt2oNuzNOWkN9ILc+e9X5Ki415PjrmnVvwFRA/X/5zTxu3XY7I+aYcwmJGLR62T48zKi2RkGoB+Ze08ckWdz/RPXtxhxstUtiOeBbBzX89GLgjRcyJcawFh87dUgtkDiowJujsqhUKG2sTtl7WLZHHc="
+    - secure: "HmiPlPDg/Kc9+EbdiK2S/l+9mH+g+ZzeHBqndiHs7VCFhg5PZrxNlh395lsLrKrjlm7L1o2b4BSOATxZ61ob22Z6R1n+ku06OokDLREANHgkOperM+Hpk49yMTFHByoxneY75VU92Q+4sD9jsC6VJ8ycSdv2hOSE52gjHtijeBc="
 
 branches:
   only:
